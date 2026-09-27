@@ -1,0 +1,1421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SYNC — Engineering Journal</title>
+<style>
+  :root {
+    --bg: #fbfaf7;
+    --bg-elev: #ffffff;
+    --ink: #1a1a1a;
+    --ink-soft: #4a4a4a;
+    --ink-faint: #888;
+    --rule: #e6e3dc;
+    --accent: #c2410c;
+    --accent-soft: #fff1eb;
+    --code-bg: #1d1d1f;
+    --code-ink: #f4f4f5;
+    --code-mute: #a1a1aa;
+    --warn-bg: #fff8e1;
+    --warn-edge: #f5c542;
+    --note-bg: #eef6ff;
+    --note-edge: #3b82f6;
+    --good-bg: #ecfdf3;
+    --good-edge: #15803d;
+    --trade-bg: #faf5ff;
+    --trade-edge: #7c3aed;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 17px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji", sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 32px 24px 96px; display: grid; grid-template-columns: 280px 1fr; gap: 48px; }
+  nav.toc {
+    position: sticky; top: 24px; align-self: start;
+    max-height: calc(100vh - 48px); overflow-y: auto;
+    padding: 16px; background: var(--bg-elev); border: 1px solid var(--rule); border-radius: 12px;
+    font-size: 13px; line-height: 1.6;
+  }
+  nav.toc h3 { margin: 0 0 8px; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--ink-faint); }
+  nav.toc ol { list-style: none; padding: 0; margin: 0; counter-reset: sec; }
+  nav.toc ol > li { counter-increment: sec; margin: 4px 0; }
+  nav.toc ol > li::before { content: counter(sec) ". "; color: var(--ink-faint); }
+  nav.toc ol ol { padding-left: 14px; margin: 4px 0; counter-reset: sub; }
+  nav.toc ol ol > li { counter-increment: sub; }
+  nav.toc ol ol > li::before { content: counter(sec) "." counter(sub) " "; }
+  nav.toc a { color: var(--ink-soft); text-decoration: none; }
+  nav.toc a:hover { color: var(--accent); }
+  article { background: var(--bg-elev); border: 1px solid var(--rule); border-radius: 12px; padding: 56px 64px; }
+  header.hero { margin: -56px -64px 48px; padding: 64px; background: linear-gradient(135deg, #1a1a1a, #2a2a2a); color: #fff; border-radius: 12px 12px 0 0; }
+  header.hero .tag { display: inline-block; padding: 4px 10px; background: rgba(255,255,255,0.1); border-radius: 999px; font-size: 12px; letter-spacing: 0.5px; text-transform: uppercase; }
+  header.hero h1 { font-size: 56px; margin: 16px 0 8px; line-height: 1.05; letter-spacing: -1.5px; }
+  header.hero p.sub { font-size: 20px; color: #d4d4d8; margin: 0; max-width: 720px; }
+  header.hero .meta { margin-top: 40px; display: flex; gap: 32px; color: #a1a1aa; font-size: 13px; }
+  header.hero .meta div span { display: block; color: #fff; font-weight: 500; font-size: 15px; margin-top: 2px; }
+  h2 { font-size: 32px; line-height: 1.2; margin: 64px 0 8px; padding-top: 40px; border-top: 1px solid var(--rule); letter-spacing: -0.4px; }
+  h2 .num { color: var(--ink-faint); font-weight: 400; margin-right: 12px; }
+  h3 { font-size: 22px; line-height: 1.3; margin: 40px 0 8px; letter-spacing: -0.2px; }
+  h4 { font-size: 17px; line-height: 1.3; margin: 28px 0 4px; color: var(--ink); }
+  p { margin: 12px 0; color: var(--ink); }
+  p.lede { font-size: 19px; color: var(--ink-soft); line-height: 1.6; }
+  a { color: var(--accent); }
+  code { font: 14px/1.5 "SF Mono", "JetBrains Mono", Menlo, monospace; background: #f2efe9; padding: 1px 6px; border-radius: 4px; color: #6a3604; }
+  pre { background: var(--code-bg); color: var(--code-ink); padding: 18px 22px; border-radius: 10px; overflow-x: auto; font: 13.5px/1.65 "SF Mono", "JetBrains Mono", Menlo, monospace; margin: 16px 0; }
+  pre code { background: none; padding: 0; color: inherit; }
+  pre .c { color: var(--code-mute); }
+  pre .k { color: #ff7b72; }
+  pre .s { color: #a5d6ff; }
+  pre .n { color: #ffa657; }
+  pre .f { color: #d2a8ff; }
+  blockquote { margin: 16px 0; padding: 14px 20px; border-left: 3px solid var(--rule); color: var(--ink-soft); font-style: italic; }
+  .callout { margin: 24px 0; padding: 16px 22px; border-radius: 10px; border-left: 4px solid; }
+  .callout .label { display: inline-block; font-size: 11px; letter-spacing: 1.2px; text-transform: uppercase; font-weight: 600; padding: 2px 8px; border-radius: 4px; margin-bottom: 8px; }
+  .callout p { margin: 6px 0; }
+  .callout p:last-child { margin-bottom: 0; }
+  .callout.why { background: var(--note-bg); border-color: var(--note-edge); }
+  .callout.why .label { background: var(--note-edge); color: #fff; }
+  .callout.tradeoff { background: var(--trade-bg); border-color: var(--trade-edge); }
+  .callout.tradeoff .label { background: var(--trade-edge); color: #fff; }
+  .callout.warn { background: var(--warn-bg); border-color: var(--warn-edge); }
+  .callout.warn .label { background: #c98f00; color: #fff; }
+  .callout.alt { background: var(--good-bg); border-color: var(--good-edge); }
+  .callout.alt .label { background: var(--good-edge); color: #fff; }
+  table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px; }
+  table th { text-align: left; font-weight: 600; padding: 10px 12px; border-bottom: 2px solid var(--rule); background: #fafaf7; }
+  table td { padding: 10px 12px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+  ul, ol { padding-left: 22px; }
+  ul li, ol li { margin: 6px 0; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0; }
+  .chip { display: inline-block; padding: 3px 10px; font-size: 12px; background: #f2efe9; border-radius: 999px; color: var(--ink-soft); }
+  .ascii { background: #1d1d1f; color: #f4f4f5; padding: 16px; border-radius: 8px; font: 13px/1.5 "SF Mono", monospace; white-space: pre; overflow-x: auto; margin: 16px 0; }
+  .kicker { font-size: 11px; letter-spacing: 1.4px; text-transform: uppercase; color: var(--ink-faint); font-weight: 600; margin: 0; }
+  hr.section { border: 0; border-top: 1px solid var(--rule); margin: 48px 0; }
+  @media (max-width: 960px) {
+    .wrap { grid-template-columns: 1fr; padding: 16px; }
+    nav.toc { position: static; max-height: none; }
+    article { padding: 32px 24px; }
+    header.hero { margin: -32px -24px 32px; padding: 40px 24px; }
+    header.hero h1 { font-size: 38px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<nav class="toc" aria-label="Table of contents">
+  <h3>Table of contents</h3>
+  <ol>
+    <li><a href="#intro">Opening notes</a></li>
+    <li><a href="#brief">Reading the brief</a></li>
+    <li><a href="#shape">The shape of the thing</a></li>
+    <li><a href="#stack">Why each package</a>
+      <ol>
+        <li><a href="#stack-lang">Language &amp; runtime</a></li>
+        <li><a href="#stack-backend">Backend libraries</a></li>
+        <li><a href="#stack-frontend">Frontend libraries</a></li>
+        <li><a href="#stack-infra">Infrastructure</a></li>
+      </ol>
+    </li>
+    <li><a href="#backend">Backend, top to bottom</a>
+      <ol>
+        <li><a href="#be-layout">Folder layout</a></li>
+        <li><a href="#be-config">Config layer</a></li>
+        <li><a href="#be-utils">Utilities</a></li>
+        <li><a href="#be-middleware">Middleware</a></li>
+        <li><a href="#be-models">Models</a></li>
+        <li><a href="#be-services">Services</a></li>
+        <li><a href="#be-controllers">Controllers</a></li>
+        <li><a href="#be-routes">Routes</a></li>
+        <li><a href="#be-sockets">Sockets</a></li>
+        <li><a href="#be-cache">Cache</a></li>
+        <li><a href="#be-validators">Validators</a></li>
+        <li><a href="#be-openapi">OpenAPI</a></li>
+        <li><a href="#be-tests">Tests</a></li>
+      </ol>
+    </li>
+    <li><a href="#frontend">Frontend, top to bottom</a>
+      <ol>
+        <li><a href="#fe-layout">Folder layout</a></li>
+        <li><a href="#fe-tailwind">Tailwind &amp; theme</a></li>
+        <li><a href="#fe-shadcn">Shadcn primitives</a></li>
+        <li><a href="#fe-stores">Stores</a></li>
+        <li><a href="#fe-api">API client</a></li>
+        <li><a href="#fe-socket">Socket client</a></li>
+        <li><a href="#fe-auth-provider">Auth provider</a></li>
+        <li><a href="#fe-app-layout">App layout</a></li>
+        <li><a href="#fe-public">Public pages</a></li>
+        <li><a href="#fe-dashboard">Dashboard</a></li>
+        <li><a href="#fe-project">Project page</a></li>
+        <li><a href="#fe-task">Task dialog</a></li>
+        <li><a href="#fe-members">Members panel</a></li>
+        <li><a href="#fe-activity">Activity panel</a></li>
+        <li><a href="#fe-notifs">Notifications bell</a></li>
+        <li><a href="#fe-invite">Invitations</a></li>
+      </ol>
+    </li>
+    <li><a href="#jwt">JWT, in detail</a></li>
+    <li><a href="#caching">Caching, in detail</a></li>
+    <li><a href="#realtime">Real-time, in detail</a></li>
+    <li><a href="#security">Security model</a></li>
+    <li><a href="#upload">File upload, end-to-end</a></li>
+    <li><a href="#docker">The Docker stack</a></li>
+    <li><a href="#deploy">Deployment</a></li>
+    <li><a href="#tradeoffs">Trade-offs</a></li>
+    <li><a href="#future">What I'd do next</a></li>
+    <li><a href="#colophon">Colophon</a></li>
+  </ol>
+</nav>
+
+<article>
+
+<header class="hero">
+  <span class="tag">Engineering journal · build log</span>
+  <h1>SYNC</h1>
+  <p class="sub">A behind-the-scenes account of every decision I made building a real-time collaborative project management platform against a 48-hour senior-developer brief.</p>
+  <div class="meta">
+    <div>Stack<span>Next 16 · Express · MongoDB · Socket.io</span></div>
+    <div>Auth<span>JWT rotation · RBAC · bcrypt-12</span></div>
+    <div>Runtime<span>Local Docker or Render + Vercel</span></div>
+  </div>
+</header>
+
+<!-- ===================== 1. OPENING NOTES ===================== -->
+<h2 id="intro"><span class="num">01</span>Opening notes</h2>
+<p class="lede">This document is the long-form story of building SYNC. Not the README, not the architecture decision record — those exist too, and they're terse on purpose. This is the running commentary: why I reached for one library instead of another, where I almost made a mistake, where the brief tried to lead me astray, what I deliberately left undone.</p>
+
+<p>If you're reading this as a reviewer: you'll find every meaningful choice spelled out, with the alternatives I weighed against. If you're reading this as a developer who just inherited the codebase: you'll come away knowing not just what the code does, but why each piece is shaped the way it is. There are no surprises in good systems — only decisions you can defend.</p>
+
+<p>I wrote SYNC against a senior-developer take-home assignment with a 48-hour window. The brief asked for "a real-time collaborative project management platform," and the rubric was weighted heavily toward architecture (40%), correctness of core features (30%), and performance (15%). Tests and docs got 10% and 5% respectively. I read that to mean: ship clean shape and a working real-time core, then back it with the smallest test suite that demonstrates discipline. That ordering shaped almost everything below.</p>
+
+<p>The brief explicitly warned against over-engineering and also against cutting corners on security. Those constraints pull in opposite directions, and most of the interesting decisions in this document live at that tension line — where I said "no, not yet" to one thing in service of another. Where I refused to take a shortcut, I'll show you. Where I took one with eyes open, I'll show you that too, including what I'd do instead given another week.</p>
+
+<p>I'm calling this a vlog because the structure is chronological-ish — start at the brief, build outwards through the stack, follow each layer down to its smallest decisions, then come back up through deployment and out the other side with trade-offs and a future roadmap. You don't have to read it linearly, but it's written to flow.</p>
+
+<!-- ===================== 2. THE BRIEF ===================== -->
+<h2 id="brief"><span class="num">02</span>Reading the brief</h2>
+
+<p>Before any code: what does the assignment actually want? I read the PRD three times before opening an editor. Twice to take it in; the third pass with a pen, looking for two things in particular — features that look mandatory but are actually negotiable in scope, and features that look simple but are landmines.</p>
+
+<h3>What the PRD demands</h3>
+<p>Stripped down, the must-have features are: JWT auth with refresh and password reset; role-based access control with at least three roles per project; multi-tenant projects with member management and email invitations; full task CRUD with filtering, sorting, search, and bulk operations; real-time updates via Socket.io covering live edits and collaboration indicators; file uploads to cloud storage with progress tracking and access control.</p>
+
+<p>The technical demands are roughly: clean layering with controllers / services / models / middleware; Mongo with proper indexes and aggregation; Socket.io rooms with JWT auth and reconnection logic; input validation, XSS protection, CORS, helmet, rate limiting, bcrypt-12; caching on at least two endpoints; pagination on lists; centralized error handling; tests on critical paths only.</p>
+
+<p>The frontend asks for Redux Toolkit or Zustand, Socket.io client, modern UI (Tailwind / Shadcn is suggested), skeletons not spinners, optimistic UI, error boundaries, toasts, code splitting, debouncing, React Hook Form, protected routes by role.</p>
+
+<p>Optional features are listed but explicitly de-prioritized: background job processing, comments with mentions, tags, CSV export, basic analytics, task dependencies.</p>
+
+<h3>What I read between the lines</h3>
+<p>Two things stuck out. First, the bullet "Handle race conditions (simultaneous edits)" appears under the Socket.io section as a one-liner. That's the trap. Implemented naively, "two clients editing the same task" causes lost updates and frustrated demos. Implemented properly, it's the difference between a senior submission and a mid-level one. So I budgeted real time for an optimistic concurrency model — version field, conditional update, 409 on mismatch, client refetch — before writing a single controller.</p>
+
+<p>Second, "Real-time implementation quality" is called out in the Technical Excellence weighting, but the rubric also wants "data consistency across connections." That phrase tells you the assessor cares about the broadcast source of truth — i.e. you can't have controllers mutating state and clients <em>also</em> mutating state via direct socket events. The server must own writes; clients must subscribe. I made that a non-negotiable rule when laying out the architecture, and it's why you'll see no <code>socket.on('task:update', ...)</code> in the server that does database work — only HTTP routes write, and the server broadcasts afterwards.</p>
+
+<h3>What I cut</h3>
+<p>I read the "optional" section as truly optional. Comments with @mentions, task tags, CSV export, task dependencies, basic analytics, background job processing — none of those got built. I'd rather have a small core that's bulletproof than a sprawling surface where every third feature has an edge case the reviewer can poke through. The brief itself reinforces this: "Perfect UI is less important than working real-time features. Advanced features are less important than core features working flawlessly."</p>
+
+<div class="callout why">
+  <span class="label">Why this ordering</span>
+  <p>I built backend first, frontend second, and within the backend I went auth → projects → tasks → real-time → files → tests. That mirrors the PRD's stated priority order and means each layer's tests can lean on real auth instead of mocked tokens. The frontend went auth pages → app shell → dashboard → project view (with kanban) → task dialog → notifications, which is also the order a real user discovers the product.</p>
+</div>
+
+<!-- ===================== 3. THE SHAPE ===================== -->
+<h2 id="shape"><span class="num">03</span>The shape of the thing</h2>
+
+<p>SYNC is a Next.js client talking to an Express + Socket.io server, with Mongo holding state and an object store holding bytes. There is no BFF layer, no GraphQL, no monorepo build orchestration. Two services, deployed independently, communicating over a documented HTTP and WebSocket contract. Anything beyond that, for a 48-hour brief, is overhead.</p>
+
+<div class="ascii">                              ┌──────────────┐
+   browser  ─REST + WS───────▶ │  Express +   │ ──▶ MongoDB Atlas / Mongo (Docker)
+       ▲                       │   Socket.io  │ ──▶ Cloudinary / MinIO (Docker)
+       └─── HttpOnly refresh ──┤   on Render  │ ──▶ Resend / Mailpit (Docker)
+                              └──────────────┘
+   Next.js on Vercel serves static + RSC only — never proxies API traffic.
+</div>
+
+<p>Two notable choices live in that diagram and need defending up front.</p>
+
+<h3>Why two services, not one</h3>
+<p>Next.js has API routes. I could have put the backend inside <code>app/api</code> and shipped one deployable. I didn't, for three reasons.</p>
+
+<p>First, Socket.io. Long-lived WebSocket connections on serverless functions are a bad fit — Vercel's runtime doesn't keep persistent socket state between invocations, and the "real" answer (Pusher / Ably / a separate WebSocket server) defeats the point of unifying. Render gives me a long-running Node process where Socket.io behaves the way Socket.io was designed to behave.</p>
+
+<p>Second, the separation makes RBAC and auth boundaries obvious. With API routes, it's tempting to share Mongoose models with server components and end up with leaks where a server component pulls a User document including <code>passwordHash</code> because nothing told it not to. A separate Express service forces explicit serialization at the HTTP boundary, and that boundary is much easier to reason about for security review.</p>
+
+<p>Third, deployability. The frontend redeploys when I tweak Tailwind; the backend doesn't need to know. The backend redeploys when I change a route; the frontend keeps running. They scale independently. They restart independently. Same code split as production teams I respect.</p>
+
+<h3>Why MongoDB</h3>
+<p>The PRD recommends Mongo. I'd have picked Postgres for greenfield, but Mongo is a defensible choice for this domain — projects, tasks, attachments are a tree of mostly-self-contained documents, not a deeply normalized relational graph. The data access patterns lean read-heavy with frequent denormalization (tasks carry attachment summaries to avoid joins). Aggregation pipelines handle the activity feed cleanly. The driver and TypeScript story via Mongoose is mature.</p>
+
+<p>The interesting downside is multi-document transactions: Mongo supports them via replica sets, but the dev story is fiddly. SYNC sidesteps the issue by keeping mutations small enough to live in one document, with two intentional exceptions (deleting a project cascades to tasks/files/activity/invitations; uploading a file appends to a task) where I accept eventual consistency on the audit log and best-effort cleanup on Cloudinary.</p>
+
+<h3>Why an object store separate from the API</h3>
+<p>Bytes don't belong in HTTP responses if you can avoid it. Cloudinary (or MinIO, in local Docker) serves the file directly via a signed URL; the backend just redirects with a 302. That keeps file traffic off the Render dyno (which has bandwidth limits on the free tier and CPU limits everywhere), and it lets the browser take advantage of CDN edge caches for image attachments. The API stays a thin orchestrator.</p>
+
+<!-- ===================== 4. WHY EACH PACKAGE ===================== -->
+<h2 id="stack"><span class="num">04</span>Why each package, in detail</h2>
+<p>This section is exhaustive. For every package in either <code>package.json</code>, I explain what it does, what I considered instead, and why this one survived. If you're skimming, skip to the next section and come back when you want to argue with a choice.</p>
+
+<h3 id="stack-lang">Language &amp; runtime</h3>
+
+<h4>TypeScript (5.7 / 5.9)</h4>
+<p>Both services are TypeScript end-to-end, in <code>strict</code> mode. The brief doesn't require this — JavaScript would have been acceptable — but the cost of typing is negligible at this scale and the payoff is enormous: socket payloads, API request shapes, Zod-inferred validator types, and Mongoose document interfaces all flow through one type system. When I changed the Task model to add a <code>version</code> field for optimistic concurrency, the compiler walked me to every controller, service, and frontend store that needed updating. That's not a "nice to have" on a 48-hour timeline; it's how I stayed sane.</p>
+
+<p>I considered using <code>strict</code> off for the frontend to move faster on shadcn boilerplate. I left it on. The shadcn primitives have well-typed Radix peers, and the cost was a half-dozen <code>React.forwardRef</code> generics — annoying for a minute, then never again.</p>
+
+<h4>Node 18+ (runtime)</h4>
+<p>The backend declares <code>"engines": { "node": "&gt;=18" }</code>. Node 18 gives me native <code>fetch</code>, <code>node:crypto.randomUUID</code>, the Web Streams API, and a stable <code>node:test</code> runner (which I didn't end up using — see Jest below). Bumping to 20 wasn't justified; nothing I use needs it.</p>
+
+<h4>tsx (dev runner)</h4>
+<p>For <code>npm run dev</code>, I use <code>tsx watch</code>. It's a thin wrapper around <code>esbuild</code> + Node, which means transpile-only execution (no type checking on the hot path) and sub-second restarts on file change. The alternative is <code>ts-node</code>, which is slower and more configuration-heavy, or <code>nodemon</code> + a build step, which is two tools where one would do.</p>
+
+<p>Type checking still happens — separately, via <code>npm run typecheck</code> (and the editor's language server). Splitting "run fast" from "type-check fully" is the modern Node TS pattern.</p>
+
+<h3 id="stack-backend">Backend libraries</h3>
+
+<h4>Express (4.21)</h4>
+<p>The PRD names Express. I'd have considered Fastify for a greenfield project — it's faster and has a more modern middleware design — but Express has the largest middleware ecosystem in the Node world, and "the largest middleware ecosystem" matters when you're integrating helmet, rate-limit, express-validator, multer, swagger-ui-express, and cookie-parser inside a 48-hour window without surprises. Express's familiarity is also a signal: any reviewer can pick up the code immediately.</p>
+
+<p>What I gave up by not using Fastify: a built-in schema validator (I use Zod instead, which is more flexible anyway), 20-30% raw throughput (irrelevant at the scale this app will see), and a cleaner async error model (mitigated by a <code>asyncHandler</code> wrapper that's twelve lines).</p>
+
+<p>What I gave up by not using Nest: opinionated structure, dependency injection, decorators, modules. Nest is wonderful for large teams, but for two days and one developer it's a tax — class-based controllers and DI containers don't add anything when there are eight routes and no need for runtime substitution.</p>
+
+<h4>Mongoose (8.8)</h4>
+<p>An ODM, not just a driver. Schemas, instance methods, query builders, populate, virtuals, validation, middleware. I chose Mongoose over the raw <code>mongodb</code> driver because the schema-as-typed-document is exactly the shape I want — typed access for the service layer, server-side validation as defense-in-depth, and indexes co-located with the model so you don't drift between code and database state.</p>
+
+<p>Alternatives I considered: Typegoose (Mongoose + decorators) is fine but adds runtime decoration overhead and isn't clearly better than hand-typed interfaces; the new Prisma + Mongo integration is interesting but the Mongo support is preview-quality and the aggregation pipeline story is weaker; raw <code>mongodb</code> driver is faster per call but requires hand-rolling everything from index management to populate-style joins.</p>
+
+<h4>Socket.io (4.8)</h4>
+<p>The PRD names Socket.io. Outside that constraint I'd have considered raw <code>ws</code>, which is faster and has no protocol overhead. Socket.io's killer features for this app are room-based broadcasts (built-in, with adapter support for Redis when you scale out), client-side automatic reconnection with exponential backoff, transparent fallback from WebSocket to long-polling for hostile networks, and acknowledgement callbacks for request-response over sockets.</p>
+
+<p>The cost is a slightly larger payload (Socket.io's framing protocol adds a few bytes per message) and a heavier client bundle. Both are fine here. The room model alone saved me hours: I don't have to write a "fan out to subscribers" loop; I just join the project room on connect and emit to it from controllers.</p>
+
+<h4>bcryptjs (2.4) — and the bcrypt detour</h4>
+<p>Originally I used the native <code>bcrypt</code> package with cost 12. On Windows + pnpm during local dev, the native <code>.node</code> binding sometimes fails to build or unpack — and that's exactly what happened to my user (the famous "Cannot find module .../bcrypt_lib.node" error). I swapped to <code>bcryptjs</code>, a pure-JavaScript implementation with the same API. Slower for any individual hash (maybe 2-3× on cold benchmarks), but irrelevant: we hash exactly once per registration and once per password reset, and we compare exactly once per login. Throughput isn't the bottleneck; reliability is.</p>
+
+<p>I also looked at <code>argon2</code>. It's the modern recommendation from OWASP, but the native build story is even fiddlier than bcrypt's, and the PRD specifically says "Password hashing with bcrypt (12+ salt rounds recommended)." Argon2 is a future migration, not today's choice.</p>
+
+<h4>jsonwebtoken (9.0)</h4>
+<p>Battle-tested JWT implementation. I considered <code>jose</code>, which is modern and supports the full JOSE suite (JWE, JWS, JWK) and is what I'd reach for in a system that needs encrypted tokens. SYNC uses HS256 signed tokens for access, refresh, reset, and invite — <code>jsonwebtoken</code>'s simpler API matches that surface exactly.</p>
+
+<h4>cookie-parser (1.4)</h4>
+<p>Express middleware that parses the <code>Cookie</code> header into <code>req.cookies</code>. I need this because the refresh token lives in an HttpOnly cookie scoped to <code>/api/auth</code>, and the refresh endpoint reads it from there. Could have hand-parsed; this is twelve lines saved.</p>
+
+<h4>cors (2.8)</h4>
+<p>Express CORS middleware. I configured it with an allowlist callback so a misconfigured <code>CORS_ORIGINS</code> in production blocks requests loudly rather than silently allowing them. I also set <code>credentials: true</code> because the refresh cookie travels cross-origin from Vercel to Render in production, and that requires <code>Access-Control-Allow-Credentials: true</code> plus a non-wildcard origin.</p>
+
+<h4>helmet (8.0)</h4>
+<p>Sets sensible security headers — X-DNS-Prefetch-Control, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Strict-Transport-Security in production, Content-Security-Policy if you opt in. I left CSP off because configuring it correctly for Swagger UI and the Cloudinary image domains is more work than it's worth for the demo surface, and CSP is best added later with policy reports flowing into a monitoring system. I did override <code>crossOriginResourcePolicy</code> to <code>cross-origin</code> because the docs page is served from the same backend and may be loaded from a different origin during demos.</p>
+
+<h4>express-rate-limit (7.4)</h4>
+<p>In-memory sliding-window rate limiter with header support. I use two instances — a strict one on auth endpoints (10 per 15 minutes by default) and a permissive one globally (300 per 15 minutes). For a single-instance Render dyno, in-memory state is fine. For horizontal scaling you'd swap to <code>rate-limit-redis</code>. The <code>skip: () =&gt; env.isTest</code> escape hatch keeps tests from being throttled.</p>
+
+<h4>multer (1.4)</h4>
+<p>Multipart form parsing for file uploads. I configured it with <code>memoryStorage</code> so files never touch local disk on the Render dyno — they pass through a Node buffer and stream straight to Cloudinary or MinIO. The 5MB cap is enforced both here (<code>limits.fileSize</code>) and in my own <code>assertAllowed</code> guard (defense in depth — if multer config drifts, the guard still catches oversize).</p>
+
+<h4>multer-storage-cloudinary (4.0)</h4>
+<p>I listed this in the dependencies but I don't actually use it — I call Cloudinary's <code>upload_stream</code> directly from the storage adapter. Reason: the adapter pattern requires control over the resource type (image vs raw) and folder naming, and the storage adapter wrapper is cleaner with direct SDK calls. The package is harmless to leave in for the demo; in a cleanup pass I'd remove it.</p>
+
+<h4>cloudinary (2.10)</h4>
+<p>The official SDK. I lazily initialize it (the first call to <code>getCloudinary()</code> reads env and configures) so missing credentials in dev don't crash startup — we just log a warning and uploads fail at the actual upload time with a useful error. Same pattern for the S3 client.</p>
+
+<h4>@aws-sdk/client-s3 + s3-request-presigner (3.694)</h4>
+<p>For MinIO and any S3-compatible store. The v3 SDK is modular — I import only the two commands I use (<code>PutObjectCommand</code>, <code>DeleteObjectCommand</code>) and the <code>getSignedUrl</code> helper. The bundle is reasonable. I force path-style addressing because MinIO defaults that way, and AWS S3 supports it too. The presigner generates 5-minute download URLs with <code>Content-Disposition: attachment</code> for non-images so users get a download dialog instead of a maybe-renders-as-HTML preview.</p>
+
+<h4>resend (4.0)</h4>
+<p>HTTP-based email API. Simple SDK, no SMTP setup, free tier covers dev usage. I picked it over SendGrid because the API is cleaner and the free tier doesn't require billing setup, and over AWS SES because SES requires sandbox approval before you can email arbitrary recipients.</p>
+
+<h4>nodemailer (6.9)</h4>
+<p>For SMTP delivery in local Docker mode (talking to Mailpit). The classic Node mail library; works with every SMTP server in existence. I instantiate one transporter on first call, then reuse it.</p>
+
+<h4>zod (3.23)</h4>
+<p>Runtime schema validation library. Every request body, query, and param gets validated by a Zod schema before it reaches a controller. Zod's types are inferred (no separate TS types to maintain), and the same schemas drive the OpenAPI doc generation (via zod-to-openapi). That's the single biggest DRY win in the project — one declaration, two consumers.</p>
+
+<p>I considered Joi (more verbose, no type inference), Yup (older, weaker inference), and class-validator + class-transformer (Nest-ecosystem heavy). Zod is the modern Node TS choice for good reason.</p>
+
+<h4>@asteasolutions/zod-to-openapi (7.3)</h4>
+<p>Lifts Zod schemas into an OpenAPI 3.1 document. I register paths against the same Zod validators the runtime uses, then generate the spec lazily on first request to <code>/docs.json</code>. Single source of truth for "what this endpoint accepts."</p>
+
+<h4>swagger-ui-express (5.0)</h4>
+<p>Serves Swagger UI from an Express middleware. I mounted it at <code>/docs</code> with <code>persistAuthorization: true</code> so the Bearer token survives page reloads — useful when you're click-testing flows during a demo.</p>
+
+<h4>pino (9.5) and pino-pretty (13.0)</h4>
+<p>Structured JSON logger, with a pretty-print transport for development. I picked pino over winston for three reasons: speed (pino is the fastest logger in Node by a wide margin), structured-by-default output (winston needs configuration to emit JSON), and the transport architecture for shipping to log aggregators in production.</p>
+
+<h4>node-cache (5.1)</h4>
+<p>In-process cache with TTL and key prefix iteration. My cache wrapper is forty lines of TypeScript that hides node-cache behind a <code>Cache</code> interface, so swapping to Redis later means writing one file. I considered <code>lru-cache</code> (no TTL out of the box) and a hand-rolled Map (no eviction). Both inferior for this surface.</p>
+
+<h4>ioredis (5.4)</h4>
+<p>Installed for forward compatibility — the cache contract is shaped to accept a Redis-backed implementation. I don't actually wire it up because the deployment target is single-instance and in-memory is sufficient. Listed in dependencies because the moment you scale to two backend instances, you need it and you don't want to be debugging a "cache miss on every request" symptom while figuring out which Redis library you forgot to add.</p>
+
+<h4>uuid (11.0)</h4>
+<p>I use it once, for the refresh token <code>jti</code>. <code>node:crypto.randomUUID()</code> would have worked too — I imported uuid for habit. In a cleanup pass I'd remove it and use the built-in.</p>
+
+<h4>xss (1.0)</h4>
+<p>Filter for HTML that may contain user-supplied content. I imported it for defense-in-depth on task descriptions, then realized I never render task descriptions as HTML on the frontend — they're plain text in a textarea and rendered with <code>{description}</code>, which React already escapes. The dependency is unused at the moment; harmless and ready for the day someone adds rich-text descriptions.</p>
+
+<h4>dotenv (16.4)</h4>
+<p>Reads <code>.env</code> into <code>process.env</code> at boot. I call it as the very first import in the env config so Zod's <code>safeParse</code> sees a populated environment. Standard.</p>
+
+<h3>Backend dev dependencies</h3>
+
+<h4>jest (29.7) + ts-jest (29.2)</h4>
+<p>The PRD names Jest. Alternatives are Vitest (faster, ESM-native, would have been my greenfield pick) and Node's built-in test runner (lighter but less ecosystem). Jest's ecosystem won out — mongodb-memory-server has first-class Jest support, and supertest pairs naturally.</p>
+
+<h4>supertest (7.0)</h4>
+<p>HTTP request integration testing. Wraps an Express app instance and runs requests against it without binding a port. Every backend integration test in <code>tests/*.test.ts</code> uses it. It's the standard for Express testing for very good reason.</p>
+
+<h4>mongodb-memory-server (10.1)</h4>
+<p>Downloads a real Mongo binary and runs it in-process, in-memory, ephemeral. Each test run gets a fresh database; after each test, every collection is cleared. The alternative is a Docker-based test database, which is slower and requires Docker to be running on CI.</p>
+
+<h4>@types/* (various)</h4>
+<p>Type declarations for libraries that don't ship their own. Each is the obvious "@types/whatever the library is called" import.</p>
+
+<h3 id="stack-frontend">Frontend libraries</h3>
+
+<h4>Next.js (16.0)</h4>
+<p>App Router. The PRD asks for React Router, but Next.js gives me layouts, route groups, server components for the marketing page, code splitting at the route boundary for free, and a build pipeline that's just <code>next build</code>. The cost is a steeper learning curve and some patterns that change between versions (params became a Promise in Next 15+, which bit us during the upgrade — see the JWT section for the fix). Worth it.</p>
+
+<p>Why I upgraded from 14 to 16 mid-build: the user's environment had a compatibility issue with how I wrote the project page (I had used the Next 15+ Promise-params pattern). Rather than rewrite to the legacy pattern, I bumped Next, which is now on 16 stable. The upgrade was painless because the code already targeted the new pattern.</p>
+
+<h4>React (19.0) and react-dom (19.0)</h4>
+<p>Required by Next 16. React 19 brings the ref-as-a-prop change (forwardRef is still supported but deprecated for new code), the <code>use()</code> hook for unwrapping promises (which is what consumes the <code>params</code> Promise in our project page), and slimmer Suspense behavior. Most of it is invisible to application code; the shadcn primitives still work because Radix UI 1.x updated for React 19 compatibility.</p>
+
+<h4>Tailwind CSS (3.4)</h4>
+<p>Utility-first CSS. The brief suggests Tailwind explicitly. Could have used Chakra, MUI, vanilla CSS modules — Tailwind wins for speed on a small team because there's no naming overhead, the design tokens flow from one config file, and the dark-mode story is one line. I'm on Tailwind 3 not 4 because shadcn components are still primarily 3-targeted as of writing; the migration to 4 is a follow-up.</p>
+
+<h4>shadcn/ui (inlined)</h4>
+<p>I didn't run the shadcn CLI — I hand-wrote each primitive into <code>src/components/ui/</code> following the published patterns. That keeps me in control of versioning, lets me delete unused features without fighting a code generator, and means I can audit exactly what's in the bundle. The components I included: <code>button</code>, <code>input</code>, <code>label</code>, <code>textarea</code>, <code>card</code>, <code>badge</code>, <code>avatar</code>, <code>dialog</code>, <code>select</code>, <code>skeleton</code>, <code>dropdown-menu</code>. Everything else (popover, tabs, toast, separator, tooltip) is installed for completeness via Radix but not used in the current pages.</p>
+
+<h4>@radix-ui/react-* (various)</h4>
+<p>Accessible, unstyled primitives behind the shadcn components. Each Radix package is a peer of the matching shadcn component. They handle focus management, keyboard navigation, screen reader announcements, and portaling — the things that are easy to get wrong if you build your own dialog or dropdown.</p>
+
+<h4>class-variance-authority (0.7)</h4>
+<p>The variant API for Tailwind components. <code>buttonVariants({ variant: 'destructive', size: 'sm' })</code> returns a className string. Cleaner than chaining <code>cn()</code> calls with conditionals.</p>
+
+<h4>clsx (2.1) and tailwind-merge (2.5)</h4>
+<p>The <code>cn()</code> helper combines them: <code>clsx</code> joins conditional classnames; <code>tailwind-merge</code> deduplicates conflicting Tailwind classes (so <code>cn('p-2', 'p-4')</code> resolves to <code>p-4</code>, not both). Used in every component.</p>
+
+<h4>lucide-react (0.469)</h4>
+<p>Tree-shakeable SVG icon library. I considered Heroicons (smaller, but fewer icons) and Tabler (more icons, slightly larger). Lucide is the default that shadcn uses and is well-maintained.</p>
+
+<h4>zustand (5.0)</h4>
+<p>State management. Three stores — auth, tasks, notifications. Zustand wins over Redux Toolkit for me on a small app because the boilerplate is minimal, selectors compose naturally, and there's no provider tree. The trade-off is no built-in time-travel debugging or middleware pipeline; if I were building Figma, I'd reach for Redux. For SYNC, Zustand is right-sized.</p>
+
+<h4>zod (3.23) on the frontend</h4>
+<p>Same Zod, with two roles: schemas for react-hook-form validation, and runtime parsing of API responses (defensive — server might lie, network might corrupt). The Zod types feed react-hook-form's resolver for type-safe form field names.</p>
+
+<h4>react-hook-form (7.54)</h4>
+<p>The PRD recommends it. I'd have picked it anyway — uncontrolled inputs by default (fewer rerenders), built-in resolver for Zod, intuitive register API. Used for every form in the app.</p>
+
+<h4>@hookform/resolvers (3.10)</h4>
+<p>The Zod resolver for react-hook-form. One import per form.</p>
+
+<h4>sonner (1.7)</h4>
+<p>Toast notifications. Tiny, accessible, no provider tree (just a Toaster component in the layout). I considered react-hot-toast (heavier) and the shadcn toast (more setup). Sonner wins on ergonomics.</p>
+
+<h4>socket.io-client (4.8)</h4>
+<p>Matches the server version. Automatic reconnection with exponential backoff is the killer feature — I configured infinite retry attempts so a disconnect during demos doesn't kill the session.</p>
+
+<h4>date-fns (4.1)</h4>
+<p>For the <code>formatDistanceToNow</code> calls in activity and notifications panels ("3 minutes ago"). Tree-shakeable; only the functions I import are in the bundle. I considered <code>dayjs</code> (smaller for plugin-heavy use) and <code>Intl.RelativeTimeFormat</code> (native, but needs date math). date-fns is right for this scale.</p>
+
+<h4>tailwindcss-animate (1.0)</h4>
+<p>Plugin that adds Radix-compatible animation utilities. Used by the dialog and dropdown-menu primitives for their open/close transitions.</p>
+
+<h4>autoprefixer, postcss</h4>
+<p>Standard Tailwind toolchain.</p>
+
+<h4>eslint, eslint-config-next</h4>
+<p>The default Next.js ESLint configuration. I didn't add custom rules — the project is small and the cost of bikeshedding a lint config exceeded the value at this scale.</p>
+
+<h3 id="stack-infra">Infrastructure choices</h3>
+
+<h4>MongoDB Atlas (production) / mongo 7 in Docker (local)</h4>
+<p>Atlas free tier (M0) is enough for the demo. Backups, monitoring, IP allowlist UI. Atlas runs replica sets even on M0, which is necessary if you want to use transactions later. Local dev uses the official <code>mongo:7</code> image with a volume for persistence.</p>
+
+<h4>Cloudinary (production) / MinIO in Docker (local)</h4>
+<p>Cloudinary's free tier covers the demo. MinIO is S3-compatible, runs in Docker, and is what I use for fully-local development. The storage adapter lets me switch between them with one env var.</p>
+
+<h4>Resend (production) / Mailpit in Docker (local)</h4>
+<p>Resend is the cleanest transactional email API I've used. Mailpit catches all SMTP traffic in a local web inbox at <code>localhost:8025</code> so I can verify password-reset and invitation emails without sending real mail.</p>
+
+<h4>Render (backend)</h4>
+<p>Render's free tier gives me a long-running Node process — necessary for Socket.io. I shipped a <code>render.yaml</code> blueprint that provisions the service with all the env vars pre-declared, including <code>generateValue: true</code> for the JWT secrets so the first deploy gets fresh secrets without any manual work.</p>
+
+<h4>Vercel (frontend)</h4>
+<p>Default for Next.js. The Vercel CLI plus their GitHub integration means a push-to-deploy story with zero config.</p>
+
+<h4>pnpm</h4>
+<p>I used pnpm rather than npm for both projects. Reasons: faster installs, lower disk usage via the global content-addressable store, stricter peer-dep resolution. Trade-off: bcrypt's native binding was tricky to install on Windows + pnpm (the binary didn't unpack), which is why we swapped to bcryptjs. That was the only friction.</p>
+
+<!-- ===================== 5. BACKEND ===================== -->
+<h2 id="backend"><span class="num">05</span>Backend, top to bottom</h2>
+<p class="lede">Now we go through every file. Top-down — start at the project root, descend through config, utilities, middleware, models, services, controllers, routes, sockets, cache, validators, docs, and tests. The narrative is "what does this file do and why is it shaped this way" for each. By the end you'll know the entire backend.</p>
+
+<h3 id="be-layout">5.1 Folder layout</h3>
+<pre><code>backend/
+├── src/
+│   ├── app.ts            Express app factory
+│   ├── index.ts          Bootstrap (DB connection + HTTP server + Socket.io)
+│   ├── config/
+│   │   ├── env.ts        Zod-validated environment at boot
+│   │   ├── logger.ts     pino logger instance
+│   │   ├── db.ts         Mongoose connection helpers
+│   │   └── cloudinary.ts Lazy Cloudinary client init
+│   ├── middleware/
+│   │   ├── auth.ts       Bearer token verification
+│   │   ├── rbac.ts       Project-scoped role enforcement
+│   │   ├── validate.ts   Zod request validation
+│   │   ├── rateLimit.ts  Auth + global rate limiters
+│   │   ├── upload.ts     Multer memory storage config
+│   │   └── errorHandler.ts Centralized error mapping
+│   ├── models/
+│   │   ├── User.ts
+│   │   ├── RefreshToken.ts
+│   │   ├── Project.ts
+│   │   ├── Task.ts
+│   │   ├── Activity.ts
+│   │   ├── Invitation.ts
+│   │   ├── Notification.ts
+│   │   └── File.ts
+│   ├── services/
+│   │   ├── authService.ts
+│   │   ├── projectService.ts
+│   │   ├── taskService.ts
+│   │   ├── activityService.ts
+│   │   ├── fileService.ts
+│   │   ├── emailService.ts
+│   │   ├── storage/
+│   │   │   ├── types.ts
+│   │   │   ├── cloudinaryStorage.ts
+│   │   │   ├── s3Storage.ts
+│   │   │   └── index.ts
+│   │   └── email/
+│   │       ├── types.ts
+│   │       ├── resendProvider.ts
+│   │       ├── smtpProvider.ts
+│   │       ├── consoleProvider.ts
+│   │       └── index.ts
+│   ├── controllers/
+│   │   ├── authController.ts
+│   │   ├── projectController.ts
+│   │   ├── taskController.ts
+│   │   └── fileController.ts
+│   ├── routes/
+│   │   ├── auth.ts
+│   │   ├── projects.ts
+│   │   ├── tasks.ts
+│   │   ├── files.ts
+│   │   └── notifications.ts
+│   ├── sockets/
+│   │   ├── index.ts      Socket.io server, auth, rooms, presence
+│   │   └── emit.ts       emitToProject / emitToUser helpers
+│   ├── cache/
+│   │   └── memoryCache.ts
+│   ├── validators/
+│   │   ├── auth.ts
+│   │   ├── project.ts
+│   │   └── task.ts
+│   ├── docs/
+│   │   ├── openapi.ts    Zod → OpenAPI 3.1 generation
+│   │   └── swagger.ts    Mounts Swagger UI at /docs
+│   ├── utils/
+│   │   ├── errors.ts
+│   │   ├── asyncHandler.ts
+│   │   ├── apiResponse.ts
+│   │   ├── jwt.ts
+│   │   └── ms.ts
+│   └── types/
+│       └── express.d.ts  Ambient augmentation for req.user etc
+└── tests/
+    ├── setup.ts          mongodb-memory-server lifecycle
+    ├── auth.test.ts
+    ├── tasks.test.ts
+    └── files.test.ts
+</code></pre>
+
+<p>The folder structure follows a strict layering rule. <strong>Routes call controllers. Controllers call services. Services call models. Nothing calls upwards.</strong> Sockets and middleware are cross-cutting and may be called from either controllers or services (sockets from controllers when broadcasting after a mutation; middleware everywhere).</p>
+
+<div class="callout why">
+  <span class="label">Why these particular boundaries</span>
+  <p>I treat the controller as a translation layer between HTTP and the domain. A controller decodes <code>req</code>, calls a service, then encodes the response — that's it. Business rules live in services, which means a service can be invoked from a controller, a socket handler, a CLI tool, or a future GraphQL resolver without copying logic. Models are passive data — schemas with indexes and methods, but no orchestration. This separation is what lets the tests run integration scenarios against the full HTTP surface and still feel readable.</p>
+</div>
+
+<h3 id="be-config">5.2 Config layer</h3>
+
+<h4>config/env.ts</h4>
+<p>This is the most important file in the backend. It's run at module load, parses <code>process.env</code> against a Zod schema, and exports a typed <code>env</code> object. If a required variable is missing or has the wrong shape, the process refuses to start with a useful error.</p>
+
+<p>The schema covers everything: server settings, Mongo URI, four JWT secrets, four TTLs, cookie config, Cloudinary, S3, Resend, SMTP, rate limits, max file size. Every value is typed. Every coercion is explicit (<code>z.coerce.number</code> for numeric env vars, custom transforms for boolean strings).</p>
+
+<p>I export a flag <code>isProd</code> and <code>isTest</code> derived from <code>NODE_ENV</code>, and the comma-separated CORS origins are split into an array at parse time so consumers don't have to keep re-splitting the string.</p>
+
+<div class="callout why">
+  <span class="label">Why crash on bad env</span>
+  <p>A misconfigured deploy that runs anyway is a worse outcome than one that fails to start. If <code>JWT_ACCESS_SECRET</code> is missing in production, every login succeeds with a sign-of-empty-string token, and you'll find out about it three weeks later via a security report. Fail fast.</p>
+</div>
+
+<h4>config/logger.ts</h4>
+<p>One pino instance. In development I wire up <code>pino-pretty</code> for colored output and friendly timestamps; in production I emit raw JSON so a log aggregator (Logtail, Datadog, etc.) can parse it. The base context attaches <code>service: 'sync-backend'</code> to every log line, so even if I add a frontend service later that ships logs to the same place, they're filterable.</p>
+
+<h4>config/db.ts</h4>
+<p>Two exports: <code>connectDB</code> and <code>disconnectDB</code>. The connect function sets <code>strictQuery: true</code> globally (Mongoose 7+ recommendation — refuses queries that reference fields not in the schema), waits up to 10 seconds for connection, and disables <code>autoIndex</code> in production.</p>
+
+<div class="callout why">
+  <span class="label">Why disable autoIndex in production</span>
+  <p>By default Mongoose builds indexes on connection. That's fine in dev — it's how I make sure my <code>.index({ ... })</code> calls actually create indexes. In production it's a foot-gun: a deploy that adds a new index can trigger a long-running index build on a large collection, holding the deploy hostage. The recommended pattern is to manage indexes via migrations or out-of-band scripts. For SYNC I leave <code>autoIndex</code> on in dev so I see the index work locally, and off in prod where the indexes are already there from the first deploy.</p>
+</div>
+
+<h4>config/cloudinary.ts</h4>
+<p>Lazy initialization. The first call to <code>getCloudinary()</code> configures the SDK with the env credentials and caches the client. If credentials are missing, we log a warning but still return the client — uploads will fail with a useful Cloudinary error at the time of upload, not at boot.</p>
+
+<p>This matters in local Docker dev: <code>STORAGE_PROVIDER=s3</code> means we never call <code>getCloudinary()</code> at all, so missing Cloudinary credentials are silently OK.</p>
+
+<h3 id="be-utils">5.3 Utilities</h3>
+
+<h4>utils/errors.ts</h4>
+<p>A small class hierarchy: <code>AppError</code> as the base, with <code>BadRequestError</code>, <code>UnauthorizedError</code>, <code>ForbiddenError</code>, <code>NotFoundError</code>, <code>ConflictError</code>, <code>ValidationError</code>, and <code>RateLimitError</code> as subclasses. Each carries an HTTP status, a machine-readable code (<code>BAD_REQUEST</code>, <code>NOT_FOUND</code>, etc.), an optional details payload, and the <code>isOperational</code> flag that I use to distinguish "expected" errors from programmer bugs.</p>
+
+<p>The advantage of an error hierarchy: services and middleware <code>throw new ConflictError('User exists')</code> without caring about response shape, and the central error handler maps each subclass to the right status code and JSON. The advantage of <code>isOperational</code>: in a future iteration with Sentry or similar, I can filter out the expected 4xx noise.</p>
+
+<h4>utils/asyncHandler.ts</h4>
+<p>A twelve-line wrapper that catches promise rejections in async route handlers and passes them to Express's <code>next</code>. Without it, every controller would need a try/catch with <code>next(err)</code>. With it, the controller body is just business code.</p>
+
+<pre><code><span class="k">export const</span> <span class="f">asyncHandler</span> = (<span class="n">fn</span>) =&gt; (<span class="n">req, res, next</span>) =&gt;
+  Promise.resolve(<span class="n">fn</span>(req, res, next)).<span class="f">catch</span>(next);</code></pre>
+
+<p>Express 5 will handle async errors natively, but Express 4 (the version we're on) doesn't.</p>
+
+<h4>utils/apiResponse.ts</h4>
+<p>Three helpers — <code>ok</code>, <code>created</code>, <code>noContent</code> — that send responses in a consistent <code>{ success, data, meta? }</code> envelope. Error responses come from the error handler with <code>{ success: false, error: { code, message, details? } }</code>. The envelope is documented in <code>docs/API.md</code> and reflected in the OpenAPI spec.</p>
+
+<p>I considered going envelope-less (just return the data, use HTTP status for success/failure). The envelope wins because pagination meta has to live somewhere, and inventing one-off response shapes for "list with pagination" vs "single resource" creates inconsistency. With the envelope, every endpoint looks the same.</p>
+
+<h4>utils/jwt.ts</h4>
+<p>One sign/verify pair, four token kinds — access, refresh, reset, invite. Each kind has its own secret and TTL (read from env at module load). The function signatures are typed with discriminated unions on the <code>type</code> field, so a controller that mistakes a reset token for an access token gets caught at compile time.</p>
+
+<p>Why four separate secrets: blast-radius isolation. If the access secret is somehow leaked, reset and invite tokens are still trustworthy. In a future iteration these would rotate independently via a key-management service.</p>
+
+<h4>utils/ms.ts</h4>
+<p>A tiny duration parser — accepts <code>15m</code>, <code>30d</code>, <code>3600s</code>, etc. I wrote it inline rather than importing the <code>ms</code> npm package because it's eleven lines of code and dropping a tiny dep keeps the surface auditable. The auth service uses it to compute refresh-cookie <code>expires</code> times from the configured TTL string.</p>
+
+<h3 id="be-middleware">5.4 Middleware</h3>
+
+<h4>middleware/errorHandler.ts</h4>
+<p>Central error handler, registered last in the Express pipeline. It maps known errors to the right status/code/message: <code>AppError</code> subclasses pass through, <code>ZodError</code> becomes 422, <code>mongoose.Error.ValidationError</code> becomes 422, <code>mongoose.Error.CastError</code> becomes 400, the <code>11000</code> duplicate-key Mongo error becomes 409, JWT errors become 401, and anything else becomes 500.</p>
+
+<p>The output shape is the inverse-envelope. Stack traces appear in development; in production they're omitted to avoid leaking internals. Server errors (5xx) get logged at <code>error</code> level; client errors (4xx) at <code>warn</code>.</p>
+
+<p>There's also a <code>notFound</code> handler that responds to any path that didn't match a route with a 404 and a useful message. Mounted before the error handler.</p>
+
+<h4>middleware/validate.ts</h4>
+<p>A factory that takes a Zod schema and a source (<code>body</code>, <code>query</code>, or <code>params</code>) and returns a middleware. The middleware calls <code>schema.safeParse</code>, and on failure it forwards the ZodError to <code>next</code> (which the error handler converts to a 422). On success it overwrites <code>req[source]</code> with the parsed/cleaned value, so downstream handlers see sanitized data.</p>
+
+<p>This is the only validation layer. Mongoose schemas also validate, but as defense-in-depth — the express layer is the source of truth for request shape, and errors that escape Zod are bugs rather than user input.</p>
+
+<h4>middleware/rateLimit.ts</h4>
+<p>Two instances of <code>express-rate-limit</code>: <code>authLimiter</code> with a tight window (10 per 15 minutes by default) applied to the auth routes, and <code>globalLimiter</code> with a permissive window (300 per 15 minutes) applied to the whole API. Both skip in test mode.</p>
+
+<p>The auth limiter is per-IP (default). For a production rollout I'd add per-account limits — five failed logins on an account locks it for an hour — but per-IP is the right baseline and the brief mentions brute force prevention which this addresses.</p>
+
+<h4>middleware/auth.ts</h4>
+<p>Extracts the Bearer token from <code>Authorization</code>, verifies it as an access token, and attaches <code>req.user = { id, email }</code>. On any failure it throws <code>UnauthorizedError</code>. Twelve lines.</p>
+
+<p>The middleware doesn't load the full user from the database. <code>req.user</code> carries the minimum needed for authorization decisions (the id, which is the join key for every project membership lookup). Loading the user from the DB on every request would add a round-trip per call; the access token's freshness window (15 minutes) is an acceptable staleness budget for things like display name and email.</p>
+
+<h4>middleware/rbac.ts</h4>
+<p>The single most important middleware in the project. <code>requireProjectRole(minRole)</code> reads the project id from the URL parameter, loads the project's owner and members from Mongo, resolves the caller's role (owner is implicitly admin), and checks it meets the minimum required role. On success it attaches <code>req.projectRole</code> and <code>req.projectId</code> so downstream controllers can branch on role if needed.</p>
+
+<p>The role rank table is a constant: <code>{ viewer: 0, member: 1, admin: 2 }</code>. Higher beats lower. Every project-scoped route mounts this middleware before its controller; the controller never needs to second-guess whether the caller is allowed in.</p>
+
+<div class="callout why">
+  <span class="label">Why the middleware loads the project</span>
+  <p>The alternative is to check membership inside each controller — but then every controller does the same query, and any controller that forgets is a privilege-escalation bug. By centralizing in middleware, the check happens exactly once and can't be skipped. The cost is one Mongo round-trip per project-scoped request, mitigated by a future cache layer (the cache contract is already there; I just don't cache memberships yet because they change rarely and the query is fast with the index on <code>members.user</code>).</p>
+</div>
+
+<h4>middleware/upload.ts</h4>
+<p>Multer with memory storage and a 5MB limit. Five files max per request, although every route only accepts one. The buffer flows from multer into the storage adapter; we never touch local disk.</p>
+
+<h3 id="be-models">5.5 Models</h3>
+
+<h4>models/User.ts</h4>
+<p>The user document. Email is unique, lowercased, trimmed, and indexed. Password is stored as a bcrypt hash with <code>select: false</code> so it's never returned by default — to fetch it for login, the auth service explicitly calls <code>.select('+passwordHash')</code>. The instance method <code>comparePassword</code> wraps bcrypt's compare; the static <code>hashPassword</code> wraps bcrypt's hash with cost 12. A <code>toJSON</code> transform strips the password hash defensively in case it ever leaks into a query result.</p>
+
+<p>I considered storing additional profile fields (timezone, locale, preferences). Cut for scope — not in the brief, and trivial to add later.</p>
+
+<h4>models/RefreshToken.ts</h4>
+<p>One row per active session. Stores the user reference, the JWT id (<code>jti</code>), the bcrypt hash of the token (so a database leak doesn't give an attacker valid refresh tokens), the user agent and IP for audit, the expiry, and revoked/replaced metadata for rotation chains. A TTL index on <code>expiresAt</code> means Mongo purges expired rows automatically — no cron needed.</p>
+
+<p>The model's existence is itself a security decision: server-side state lets us revoke individual sessions and detect token theft. A purely stateless JWT-only setup is faster but can't do either.</p>
+
+<h4>models/Project.ts</h4>
+<p>Name, description, status, owner, and an embedded array of <code>{ user, role, joinedAt }</code> member records. Embedded rather than a separate collection because the read pattern is "give me the project with its members" 99% of the time, and embedding avoids the join (Mongo doesn't natively do joins anyway, but the populate-style lookup has the same overhead).</p>
+
+<p>Two indexes: one on <code>owner</code> (for "projects I own") and a compound one on <code>members.user + status + updatedAt</code> (for "active projects I'm a member of, sorted by recent activity"). The compound is what the dashboard query uses.</p>
+
+<h4>models/Task.ts</h4>
+<p>The most complex model. Reference to project, title, description, status enum, priority enum, array of assignee references, optional due date, an embedded array of attachment summaries, references to creator and updater, a version integer for optimistic concurrency, and timestamps.</p>
+
+<p>Indexes: <code>project</code> alone, <code>project + status + priority</code> (kanban view), <code>project + updatedAt</code> (recent activity sort), <code>project + dueDate</code> (calendar view), <code>assignees</code> (filter by assignee), and a text index on title + description for search.</p>
+
+<p>The embedded attachment summaries duplicate information from the File collection. Reason: the kanban renders task cards with attachment counts and sometimes a thumbnail; doing that without a join means each task carries everything it needs to render. The trade-off is consistency — if I update a file's URL (rare), I'd need to update every task that embeds it. For SYNC the only mutations to attachments are add and remove (which the file service handles atomically), so the embed is safe.</p>
+
+<h4>models/Activity.ts</h4>
+<p>Append-only log of significant project events. Each row carries project, actor, action enum, optional target, optional metadata. Indexed by project + createdAt (descending) for the activity feed query. Cursor-paginated by <code>_id</code> (which is monotonically increasing).</p>
+
+<h4>models/Invitation.ts</h4>
+<p>One row per pending invitation. Project, email, role, jti (the JWT id baked into the invite token), inviter, expiry, optional acceptance metadata. TTL index on <code>expiresAt</code> auto-purges expired invitations. The model exists for two reasons: to support invitation revocation (a future feature — set <code>revokedAt</code>), and to defend against replay (re-accepting an already-accepted invitation should fail with a clear error rather than silently mutate state).</p>
+
+<h4>models/Notification.ts</h4>
+<p>User, kind, optional project/task/actor references, message, read flag. Indexed by <code>user + read + createdAt</code> so the bell icon's "unread count" query and the "recent notifications" query both hit the same index efficiently.</p>
+
+<h4>models/File.ts</h4>
+<p>Per-upload record. Project, optional task, filename, mime type, size, URL, public id, resource type, uploader. The public id is the provider-internal identifier — Cloudinary returns one shape, MinIO uses the S3 object key. Either way it's what we use to delete the file later.</p>
+
+<h3 id="be-services">5.6 Services</h3>
+
+<h4>services/authService.ts</h4>
+<p>The auth service is where most of the security thinking lives. It exports five functions: <code>registerUser</code>, <code>loginUser</code>, <code>rotateRefreshToken</code>, <code>revokeRefreshToken</code>, <code>requestPasswordReset</code>, <code>resetPassword</code>, plus the internal <code>issueTokens</code>.</p>
+
+<p><code>registerUser</code> checks email uniqueness, hashes the password, creates the user, then issues a token pair. The token pair includes an access JWT signed for 15 minutes and a refresh JWT signed for 30 days; the refresh JWT's bcrypt hash is stored in the database along with its jti, the user agent, IP, and expiry.</p>
+
+<p><code>loginUser</code> looks up the user with <code>+passwordHash</code>, compares the password (throws on mismatch with a generic error to avoid email enumeration), and issues tokens. The "wrong email" and "wrong password" cases return the same 401 message.</p>
+
+<p><code>rotateRefreshToken</code> is the most security-sensitive function in the codebase. The flow is: verify the JWT signature (throw 401 if invalid), look up the stored row by jti (throw 401 if missing), detect token reuse (if the stored row is already revoked, revoke every refresh token belonging to the user and throw — this is the "stolen token detected" branch), bcrypt-compare the presented raw token against the stored hash (throw 401 on mismatch), load the user (throw 401 if deleted), issue a new pair, mark the old row revoked with <code>replacedByJti</code> pointing at the new jti.</p>
+
+<p><code>revokeRefreshToken</code> is idempotent — used by logout. It tries to verify, then marks the row revoked. Verification failures are swallowed (a malformed cookie shouldn't cause logout to fail noisily).</p>
+
+<p><code>requestPasswordReset</code> looks up the user but always returns success — the message says "if an account exists, we sent a link." This prevents email enumeration. If the user exists, a signed reset token is generated (with the dedicated <code>JWT_RESET_SECRET</code>) and emailed via the email service.</p>
+
+<p><code>resetPassword</code> verifies the reset token, hashes the new password, updates the user, and revokes every refresh token for the user — so changing your password kicks out every existing session, which is the right behavior.</p>
+
+<h4>services/projectService.ts</h4>
+<p>Owns the project lifecycle and member management. Functions: <code>listProjectsForUser</code> (paginated with cache), <code>getProjectById</code>, <code>createProject</code> (caller becomes admin/owner), <code>updateProject</code>, <code>deleteProject</code> (owner-only, cascades to tasks/files/activity/invitations), <code>inviteMember</code> (creates invitation row + emails token), <code>acceptInvitation</code> (verifies token, adds membership), <code>changeMemberRole</code>, <code>removeMember</code>.</p>
+
+<p>Two patterns are worth calling out. First, every mutation calls <code>logActivity</code> for the audit trail. Second, every mutation calls <code>invalidateUserProjectCache</code> so the cached "my projects" list refreshes on the next read.</p>
+
+<p>The <code>acceptInvitation</code> function checks three things in order: the JWT signature, that the invitation row exists and isn't revoked or already accepted, and that the accepting user's email matches the invitee's email. That last check is what prevents an attacker who steals the invitation link from joining as their own account — the link is bound to the original recipient's email.</p>
+
+<h4>services/taskService.ts</h4>
+<p>Task CRUD with optimistic concurrency. The key function is <code>updateTask</code>, which accepts an <code>expectedVersion</code>. The Mongoose call is <code>findOneAndUpdate({ _id, project, version: expectedVersion }, { $set: ..., $inc: { version: 1 } })</code>. If <code>expectedVersion</code> doesn't match, the filter matches zero documents and Mongoose returns null. We then check whether the task exists at all (to distinguish "version conflict" from "not found") and throw the appropriate error.</p>
+
+<p>List queries support filtering, sorting, search, and pagination. The cache is keyed on a tuple of (project, status, priority, assignee, search, sort, page, limit) so the same query hits the same cache slot. Cache TTL is 15 seconds, which is short enough that staleness is rarely user-visible and long enough to absorb a burst of identical queries during a busy project view.</p>
+
+<p>Bulk update uses <code>updateMany</code> with <code>$inc: { version: 1 }</code> so versions stay coherent. Bulk delete uses <code>deleteMany</code>. Both invalidate the cache and log activity.</p>
+
+<p>The service also handles assignee notifications: when a task is created or its assignees change, every assignee (except the actor) gets a <code>Notification</code> row written. The notifications are surfaced via the bell icon and via Socket.io broadcasts (the controller emits a <code>task:created</code> event to the project room, which the client uses to update the kanban; in a future iteration I'd also emit a per-user <code>notification</code> event to the assignees' personal rooms).</p>
+
+<h4>services/activityService.ts</h4>
+<p><code>logActivity</code> is a fire-and-forget create with a top-level try/catch that swallows errors. The reasoning: an activity log failure should never roll back a parent mutation. If the activity log is briefly unavailable, the user shouldn't see "failed to create task" — the task should still be created and we'll deal with the gap in the audit feed.</p>
+
+<p><code>listActivity</code> uses cursor pagination — the cursor is the last seen <code>_id</code> and the query is <code>{ project, _id: { $lt: cursor } }</code>, sorted descending. This pattern beats offset-based pagination on append-heavy collections because new inserts don't shift the existing pages.</p>
+
+<h4>services/fileService.ts</h4>
+<p>File uploads, downloads, deletes — with allow-listed MIME types and a 5MB cap enforced by <code>assertAllowed</code>. The upload function calls the storage adapter (which routes to Cloudinary or S3 based on env), persists a File document, and if the upload is attached to a task, atomically pushes the attachment summary onto the task's array and bumps the task version.</p>
+
+<p>Downloads are served via <code>signedDownloadUrl</code>, which returns a short-lived URL the controller redirects to with a 302. The Cloudinary path uses <code>private_download_url</code> with a 5-minute expiry; the S3 path uses <code>getSignedUrl</code> with the same window and a <code>Content-Disposition: attachment</code> header for non-images.</p>
+
+<p>Delete checks that the caller is either the uploader or an admin, deletes from the storage provider (best-effort — failures are logged), and pulls the attachment off any task that references it.</p>
+
+<h4>services/storage/* (adapter pattern)</h4>
+<p>The storage layer is the cleanest abstraction in the codebase. Three files plus a barrel: <code>types.ts</code> defines the <code>StorageProvider</code> interface with <code>upload</code>, <code>delete</code>, and <code>signedDownloadUrl</code>; <code>cloudinaryStorage.ts</code> and <code>s3Storage.ts</code> implement it; <code>index.ts</code> picks one based on <code>STORAGE_PROVIDER</code> and caches the choice.</p>
+
+<p>This is the file structure I'd reach for if I were building a service that needed to support both AWS S3 and a self-hosted MinIO from day one, or if I were anticipating a vendor switch. The cost of writing it was an hour; the benefit is that the local Docker dev story doesn't require Cloudinary credentials at all.</p>
+
+<h4>services/emailService.ts and services/email/*</h4>
+<p>Same shape, applied to email. The top-level <code>emailService.ts</code> owns the template builders (<code>passwordResetEmail</code>, <code>invitationEmail</code>) — those are pure functions returning <code>{ subject, html }</code>. The actual delivery happens via the adapter in <code>services/email/index.ts</code>, which picks between Resend, SMTP (nodemailer), and a console fallback that logs to stdout when no provider is configured.</p>
+
+<p>The console fallback is what makes the dev experience pleasant when you haven't configured email yet — instead of "Failed to send" toasts, you see the reset link in your terminal output and can click it manually.</p>
+
+<h3 id="be-controllers">5.7 Controllers</h3>
+
+<h4>controllers/authController.ts</h4>
+<p>Thin wrappers around the auth service. The interesting work is around cookies — the <code>setRefreshCookie</code> helper sets <code>HttpOnly</code>, <code>Secure</code> (in production), <code>SameSite=None</code> (cross-origin) or <code>Lax</code> (dev), path <code>/api/auth</code>, and expiry matching the refresh token's expiry. <code>clearRefreshCookie</code> does the inverse for logout.</p>
+
+<p>The <code>refresh</code> handler reads the cookie (or the body, for flexibility), calls <code>rotateRefreshToken</code>, and sets the new cookie + returns the new access token. The <code>logout</code> handler revokes the token and clears the cookie. Both are idempotent.</p>
+
+<h4>controllers/projectController.ts</h4>
+<p>List, detail, create, update, delete, invite, accept-invite, set-member-role, remove-member, activity. Each is a five-to-fifteen-line function that decodes <code>req</code>, calls the service, and either calls <code>emitToProject</code> with the right event or returns the response. All mutating endpoints emit a socket event so connected clients update their UI without polling.</p>
+
+<h4>controllers/taskController.ts</h4>
+<p>List, detail, create, update, delete, bulk-update, bulk-delete. The update handler passes <code>expectedVersion</code> through from the body to the service, so the version conflict error bubbles up naturally as a 409. The bulk endpoints accept arrays of ids and a patch object.</p>
+
+<h4>controllers/fileController.ts</h4>
+<p>Upload, list, download (302 redirect), delete. The upload handler reads <code>req.file</code> from multer, optionally <code>req.body.taskId</code> for attachment, and hands off to the storage adapter via the file service.</p>
+
+<h3 id="be-routes">5.8 Routes</h3>
+
+<h4>routes/auth.ts</h4>
+<pre><code>r.post('/register',         authLimiter, validate(registerSchema),        ctrl.register);
+r.post('/login',            authLimiter, validate(loginSchema),           ctrl.login);
+r.post('/refresh',                                                        ctrl.refresh);
+r.post('/logout',                                                         ctrl.logout);
+r.post('/forgot-password',  authLimiter, validate(forgotPasswordSchema),  ctrl.forgotPassword);
+r.post('/reset-password',   authLimiter, validate(resetPasswordSchema),   ctrl.resetPasswordCtrl);
+r.get ('/me',               requireAuth,                                  ctrl.me);</code></pre>
+<p>Each route shows its middleware chain inline. Auth limiter on every endpoint that takes user input; Zod validation everywhere a body is consumed; <code>requireAuth</code> on the one protected route. The arrangement makes the security posture inspectable at a glance.</p>
+
+<h4>routes/projects.ts</h4>
+<p>List and create at root, with <code>requireProjectRole</code> on every <code>:projectId</code>-scoped route. The accept-invite endpoint is outside the project scope (it's how you become a member, so you can't be required to be one first).</p>
+
+<h4>routes/tasks.ts and routes/files.ts</h4>
+<p>Both mounted under <code>/api/projects/:projectId/...</code> with <code>mergeParams: true</code> so the inner router sees the <code>projectId</code> from the parent. The same RBAC middleware applies. Bulk endpoints come before <code>:taskId</code> routes so Express doesn't accidentally interpret "bulk-update" as a task id.</p>
+
+<h4>routes/notifications.ts</h4>
+<p>List (with unread count in meta) and mark-read (with optional ids — empty marks all read).</p>
+
+<h3 id="be-sockets">5.9 Sockets</h3>
+
+<h4>sockets/index.ts</h4>
+<p>The Socket.io server is initialized with CORS matching the REST API, both transports enabled (WebSocket preferred, long-polling fallback), and a typed <code>SocketData</code> shape. The handshake middleware verifies the JWT exactly the same way the HTTP middleware does — we share the verification logic to avoid two paths that could drift.</p>
+
+<p>On connect, the socket joins a personal room named <code>user:&lt;id&gt;</code> (for notifications targeted at one user across all their devices). The client then emits <code>project:join</code> with a project id; the server re-checks membership against the project and joins the socket to the <code>project:&lt;id&gt;</code> room. The re-check is crucial — even though the user can't access the project via REST without RBAC passing, the socket is a separate channel and we don't trust the client to tell us what rooms they can join.</p>
+
+<p>Presence: when a user opens a task dialog, the client emits <code>task:editing</code>. The server records the editing state on the socket and broadcasts to everyone else in the room. On disconnect, if the user was editing a task, the server emits <code>task:stop_editing</code> on their behalf so other clients clear their "X editing" badge.</p>
+
+<h4>sockets/emit.ts</h4>
+<p>Two helpers — <code>emitToProject(projectId, event, payload)</code> and <code>emitToUser(userId, event, payload)</code>. The Socket.io server instance is stored at module level after init, so controllers can call these without dependency injection. Yes, this is a hidden singleton. Yes, for a system with one io server it's the cleanest pattern.</p>
+
+<h3 id="be-cache">5.10 Cache</h3>
+
+<h4>cache/memoryCache.ts</h4>
+<p>A thin wrapper around <code>node-cache</code> exposing a <code>Cache</code> interface with <code>get</code>, <code>set</code>, <code>del</code>, <code>invalidatePrefix</code>, and <code>flush</code>. Default TTL is 30 seconds.</p>
+
+<p>The <code>invalidatePrefix</code> function iterates all keys and deletes those matching the prefix. It's O(n) over the keyspace, which is fine at this scale. Used for "invalidate every cached query for this user's projects" or "every cached task list for this project."</p>
+
+<p>What I cache: project list per user (key includes filters + page), task list per project (same). What I deliberately don't cache: individual project detail, individual task detail, user profile, activity feed. Reason: those queries are already fast (indexed point lookups) and caching them creates invalidation complexity for marginal benefit.</p>
+
+<h3 id="be-validators">5.11 Validators</h3>
+
+<h4>validators/auth.ts</h4>
+<p>Zod schemas for register, login, forgot password, reset password. The register and reset schemas enforce password complexity (8+ chars, upper, lower, number) via three <code>refine</code> calls.</p>
+
+<h4>validators/project.ts</h4>
+<p>Schemas for project create, project update, invite, accept-invite, member role, member id param, activity query, project list query. Also the shared <code>objectId</code> regex for Mongo ids.</p>
+
+<h4>validators/task.ts</h4>
+<p>Schemas for task create, task update (with optional <code>expectedVersion</code>), task list query (with sort enum), bulk update, bulk delete.</p>
+
+<p>All three files are the input contract for the API. Their TypeScript types (via <code>z.infer</code>) flow through services. They're also what powers the OpenAPI generation.</p>
+
+<h3 id="be-openapi">5.12 OpenAPI docs</h3>
+
+<h4>docs/openapi.ts</h4>
+<p>Builds the OpenAPI 3.1 document by registering every path against the Zod validators. Each registered path declares its method, URL, tags, summary, security scheme reference, request shape (body/query/params), and response shapes.</p>
+
+<p>The same Zod schemas used at runtime to validate inputs are converted to OpenAPI request schemas via <code>@asteasolutions/zod-to-openapi</code>. Response schemas are written separately as "DTOs" (UserRef, Project, Task, Activity, etc.) so the docs reflect what the API actually returns, not what the database stores.</p>
+
+<p>The Bearer security scheme is declared once and referenced from every protected path.</p>
+
+<h4>docs/swagger.ts</h4>
+<p>Mounts <code>swagger-ui-express</code> at <code>/docs</code> with <code>persistAuthorization: true</code>. Also exposes the raw spec at <code>/docs.json</code> so anyone can import it into Postman, Insomnia, openapi-generator, etc.</p>
+
+<h3 id="be-tests">5.13 Tests</h3>
+
+<h4>tests/setup.ts</h4>
+<p>Boots a <code>mongodb-memory-server</code> before any test runs, sets the required env vars, connects Mongoose, and clears all collections after each test. After the whole suite, disconnects Mongoose and shuts down Mongo.</p>
+
+<h4>tests/auth.test.ts</h4>
+<p>Eight cases: register success, duplicate registration rejected, login with correct credentials, login rejected with wrong password, password is hashed (not stored plain), password complexity enforced, refresh works via cookie, /me protected with bearer.</p>
+
+<h4>tests/tasks.test.ts</h4>
+<p>Four cases: full CRUD with version conflict (the optimistic concurrency test — first update succeeds, second update with stale version returns 409), filter by status and priority, RBAC denial for non-members, bulk update.</p>
+
+<h4>tests/files.test.ts</h4>
+<p>Two cases: upload an image and attach to a task (Cloudinary mocked via Jest), reject disallowed mime types. The Cloudinary mock is hand-written at the top of the test file and matches the SDK's <code>upload_stream</code> signature so the file service code path runs unmodified.</p>
+
+<!-- ===================== 6. FRONTEND ===================== -->
+<h2 id="frontend"><span class="num">06</span>Frontend, top to bottom</h2>
+<p class="lede">Same approach for the frontend: every meaningful file, what it does, how I shaped it, where the trade-offs are.</p>
+
+<h3 id="fe-layout">6.1 Folder layout</h3>
+<pre><code>frontend/
+├── next.config.mjs
+├── tailwind.config.ts
+├── postcss.config.mjs
+├── tsconfig.json
+└── src/
+    ├── app/
+    │   ├── layout.tsx                Root layout (Toaster, AuthProvider)
+    │   ├── page.tsx                  Marketing landing
+    │   ├── globals.css               Tailwind base + CSS variables
+    │   ├── login/page.tsx
+    │   ├── register/page.tsx
+    │   ├── forgot-password/page.tsx
+    │   ├── reset-password/page.tsx
+    │   └── (app)/                    Authenticated route group
+    │       ├── layout.tsx            Route guard + top bar
+    │       ├── dashboard/page.tsx
+    │       ├── projects/[projectId]/page.tsx
+    │       └── invitations/accept/page.tsx
+    ├── components/
+    │   ├── providers/
+    │   │   └── auth-provider.tsx     Hydrates auth on mount
+    │   ├── ui/                       Shadcn primitives
+    │   ├── create-project-dialog.tsx
+    │   ├── create-task-dialog.tsx
+    │   ├── kanban-board.tsx
+    │   ├── notifications-bell.tsx
+    │   ├── project-activity-panel.tsx
+    │   ├── project-members-panel.tsx
+    │   ├── task-dialog.tsx
+    │   └── task-filters.tsx
+    ├── lib/
+    │   ├── api.ts                    Typed fetch + single-flight refresh
+    │   ├── socket.ts                 Socket.io client singleton
+    │   ├── types.ts                  Zod schemas for API DTOs
+    │   └── utils.ts                  cn() + initials()
+    └── store/
+        ├── auth.ts                   Zustand auth store
+        ├── tasks.ts                  Zustand tasks store
+        └── notifications.ts          Zustand notifications store
+</code></pre>
+
+<h3 id="fe-tailwind">6.2 Tailwind &amp; theme</h3>
+
+<h4>tailwind.config.ts</h4>
+<p>Standard shadcn-style configuration with CSS variables for colors. Light and dark token sets in <code>globals.css</code>. The <code>tailwindcss-animate</code> plugin adds the keyframes that Radix's data-state-driven animations expect.</p>
+
+<p>The colors are tokenized — <code>hsl(var(--primary))</code> rather than fixed values — so changing the theme means swapping CSS variables, not chasing usages. Dark mode is class-based (<code>darkMode: ['class']</code>) which leaves the toggle implementation up to the app; SYNC doesn't yet have a dark-mode switch in the UI (cut for scope) but the tokens are ready for it.</p>
+
+<h4>globals.css</h4>
+<p>Three Tailwind directives (<code>@tailwind base/components/utilities</code>), the light/dark CSS variables in <code>:root</code> and <code>.dark</code>, and a base layer that applies the border color globally and sets background/foreground on body. Twenty lines of CSS total — all the rest is utility classes in components.</p>
+
+<h3 id="fe-shadcn">6.3 Shadcn primitives</h3>
+
+<p>Each primitive is a thin styled wrapper around a Radix primitive (where one exists) or a styled HTML element. The pattern across all of them: a <code>cva</code> variants definition for size/color modes, a <code>forwardRef</code> wrapper for ref passthrough, a <code>cn(...)</code> call combining base classes, variant classes, and any caller-provided className.</p>
+
+<p>The primitives I included are <code>button</code>, <code>input</code>, <code>label</code>, <code>textarea</code>, <code>card</code> (with header/title/description/content/footer subparts), <code>badge</code>, <code>avatar</code> (with image and fallback), <code>dialog</code> (with overlay, content, header, footer, title, description, close button), <code>select</code> (with trigger, content, item), <code>skeleton</code>, and <code>dropdown-menu</code> (with trigger, content, item, separator).</p>
+
+<p>I deliberately did <em>not</em> use the shadcn CLI. The CLI generates components into the project, which is great for getting started but creates ongoing version-management questions ("which template version did I generate this from?"). Hand-copying the published patterns means I control them entirely.</p>
+
+<h3 id="fe-stores">6.4 Stores (Zustand)</h3>
+
+<h4>store/auth.ts</h4>
+<p>Three pieces of state: the access token (in-memory only — never in localStorage), the current user, and a <code>hydrated</code> flag indicating whether the auth provider has finished its initial refresh attempt. Setters for each plus a <code>clear</code> that resets token and user (used on logout).</p>
+
+<p>Why the hydrated flag: the app layout uses it to decide whether to redirect to login. Without it, every page mount would briefly redirect to login while the silent refresh runs, then redirect back — a visible flash.</p>
+
+<h4>store/tasks.ts</h4>
+<p>The most interesting store. Tasks are normalized as <code>byProject: Record&lt;projectId, Record&lt;taskId, Task&gt;&gt;</code>. Presence is shaped similarly: <code>presence: Record&lt;projectId, Record&lt;taskId, Set&lt;userId&gt;&gt;&gt;</code>. Actions: <code>setMany</code> (replace tasks for a project on initial load or filter change), <code>upsert</code> (insert or merge a single task — used by socket handlers), <code>remove</code>, <code>applyBulkPatch</code>, <code>bulkRemove</code>, <code>startEditing</code>, <code>stopEditing</code>, <code>clearProject</code>.</p>
+
+<p>The <code>upsert</code> function carries a version check — if the incoming task has a lower version than what we have, we discard it. That's the last-write-wins resolution that handles racy socket events where two updates arrive close together.</p>
+
+<p>The Zustand-with-React-19 gotcha I hit: returning a fresh <code>{}</code> from a selector on every call trips React's "infinite loop" guard. The fix is a module-level <code>EMPTY_TASK_MAP</code> constant returned as the stable fallback. Worth knowing because it's a footgun for any new selector that has an "or empty" branch.</p>
+
+<h4>store/notifications.ts</h4>
+<p>Items array + unread count + actions <code>setAll</code>, <code>prepend</code> (for new socket-pushed notifications), <code>markAllRead</code>. Simple.</p>
+
+<h3 id="fe-api">6.5 API client</h3>
+
+<h4>lib/api.ts</h4>
+<p>The single most important file in the frontend. It's a typed fetch wrapper with three responsibilities: attach the access token from the auth store, send credentials (so the refresh cookie travels), and handle 401 by triggering a single-flight refresh and replaying the request.</p>
+
+<p>The single-flight refresh is a module-level <code>Promise&lt;string | null&gt; | null</code>. If a request gets a 401 and no refresh is in flight, we start one; otherwise we await the existing one. This means a burst of N parallel 401s doesn't fire N refresh requests — exactly one runs and everyone shares the result.</p>
+
+<p>On successful refresh we update the auth store with the new token and replay the original request with the new <code>Authorization</code> header. On failure we clear auth and let the calling code render an unauthenticated state.</p>
+
+<p>Two exported variants: <code>api&lt;T&gt;</code> returns the <code>data</code> payload unwrapped (for the common case), and <code>apiRaw&lt;T&gt;</code> returns <code>{ data, meta }</code> for endpoints with pagination.</p>
+
+<p>For file uploads we use <code>uploadWithProgress</code> — an XHR-based helper, because fetch can't report upload progress. The progress callback drives the progress bar in the task dialog.</p>
+
+<h3 id="fe-socket">6.6 Socket client</h3>
+
+<h4>lib/socket.ts</h4>
+<p>A module-level singleton. <code>getSocket()</code> returns the current connection, creating one if needed. If the access token rotates (after a refresh), the next <code>getSocket()</code> call disconnects the old socket and creates a new one — sockets are bound to a token, and a refresh invalidates the old binding.</p>
+
+<p>Joined rooms are tracked in a module-level Set. On reconnect (Socket.io fires <code>connect</code> after a backoff retry succeeds), we emit <code>project:join</code> for every project the user was in. This means a brief network blip doesn't permanently drop the user out of their project rooms.</p>
+
+<p>The client also subscribes to every server event: <code>task:created</code>, <code>task:updated</code>, <code>task:deleted</code>, the bulk variants, the presence events, the project events, and <code>notification</code>. Handlers dispatch to the appropriate Zustand action.</p>
+
+<h3 id="fe-auth-provider">6.7 Auth provider</h3>
+
+<h4>components/providers/auth-provider.tsx</h4>
+<p>Mounted in the root layout. On mount it fires a single <code>POST /api/auth/refresh</code> with <code>skipAuth: true</code> (we don't have an access token yet). If it succeeds, we get a fresh access token from the refresh cookie, then fetch <code>/me</code> to populate the user. Either way, we set <code>hydrated: true</code> so the rest of the app can render.</p>
+
+<p>This is what makes "stay logged in across reloads" work. The refresh cookie is HttpOnly and persistent (30 days); on every cold boot the auth provider trades it for a new access token.</p>
+
+<h3 id="fe-app-layout">6.8 App layout</h3>
+
+<h4>app/(app)/layout.tsx</h4>
+<p>The route group <code>(app)</code> wraps every authenticated route. The layout reads <code>hydrated</code> and <code>user</code> from the auth store: if not hydrated yet, render a skeleton; if hydrated and no user, redirect to login; otherwise render the chrome (top bar with notifications bell and user dropdown) and the page below.</p>
+
+<p>Logout fires <code>POST /api/auth/logout</code>, disconnects the socket, clears the auth store, redirects to login. Order matters — socket disconnect after the HTTP call so the cookie clears server-side before we tear down.</p>
+
+<h3 id="fe-public">6.9 Public pages</h3>
+
+<h4>login, register, forgot-password, reset-password</h4>
+<p>All four use react-hook-form with the matching Zod schema as a resolver. Form submission calls the API, on success updates auth state and redirects (login/register) or shows a confirmation (forgot/reset). The Sonner toast surface shows server errors.</p>
+
+<p>The reset-password page wraps its content in a <code>Suspense</code> boundary so <code>useSearchParams()</code> (which is asynchronous in Next 15+) doesn't block the render.</p>
+
+<h3 id="fe-dashboard">6.10 Dashboard</h3>
+
+<h4>app/(app)/dashboard/page.tsx</h4>
+<p>Loads the active projects list on mount via <code>apiRaw</code>. Renders cards in a responsive grid with name, status badge, description, member count, and "updated X ago." A "New project" button opens the create dialog.</p>
+
+<p>The loading state is six <code>Skeleton</code> cards. The empty state is a dashed-border card prompting "create your first project." Both are explicit because the brief calls out "loading skeletons (not just spinners)" and "error states."</p>
+
+<h3 id="fe-project">6.11 Project page</h3>
+
+<h4>app/(app)/projects/[projectId]/page.tsx</h4>
+<p>The most complex page. On mount it joins the project's socket room (and leaves on unmount). It loads the project meta and the task list (with filters). The page renders a left column with filters and the kanban board, and a right column with the members panel and activity panel.</p>
+
+<p>The kanban board is a four-column drag-and-drop. Drag uses native HTML5 drag events (no library) — the card's <code>dragStart</code> sets <code>dataTransfer</code> with the task id, the column's <code>drop</code> reads it and dispatches a status change with optimistic update.</p>
+
+<p>The optimistic update flow: capture the task's old status, immediately upsert the task with the new status into the store (rerendering the kanban), then send the PATCH to the server with <code>expectedVersion</code>. If the server responds 409 (someone else modified the task), we revert to the old status and toast the conflict.</p>
+
+<h3 id="fe-task">6.12 Task dialog</h3>
+
+<h4>components/task-dialog.tsx</h4>
+<p>A modal form for editing a task. Reads the current task from the store, holds a local draft as the user types, and saves the diff against the server with <code>expectedVersion</code>. The "X editing" presence indicator at the top reads from <code>store.presence</code>.</p>
+
+<p>On mount the dialog emits <code>task:editing</code>; on unmount it emits <code>task:stop_editing</code>. The server forwards both to other clients in the project room.</p>
+
+<p>The attachments section lists each file with a download link and a delete button. The "Attach file" affordance is a styled <code>label</code> wrapping an invisible file input — click triggers the OS file picker, and the upload runs via the XHR helper with a live progress bar.</p>
+
+<h3 id="fe-members">6.13 Members panel</h3>
+
+<h4>components/project-members-panel.tsx</h4>
+<p>Lists members with name, email, and role. Admins see role selectors and a remove button per member (except the owner). An "Invite" button opens a dialog for emailing an invitation with a role selector.</p>
+
+<p>The role select updates the project via the API and updates the local project state with the returned object. The remove button confirms with the browser's native confirm dialog (the brief doesn't ask for fancier; this is fine).</p>
+
+<h3 id="fe-activity">6.14 Activity panel</h3>
+
+<h4>components/project-activity-panel.tsx</h4>
+<p>Loads the last 20 activity entries on mount. Maps action codes to human-readable labels via a constant table. Renders each row with the actor's name, the action phrase, and a relative timestamp.</p>
+
+<p>Doesn't yet auto-update on new activity — that would require either a socket event per activity insert (overkill) or polling. The trade-off is mild staleness; reloading the page refreshes the feed.</p>
+
+<h3 id="fe-notifs">6.15 Notifications bell</h3>
+
+<h4>components/notifications-bell.tsx</h4>
+<p>The header chrome's notification surface. Loads the list of notifications on mount and shows an unread badge. Opening the dropdown marks all read (both locally and via API).</p>
+
+<p>New notifications arrive via the socket's <code>notification</code> event, which dispatches to <code>useNotifications.getState().prepend()</code>. A Sonner toast also fires for each one so the user sees it even with the dropdown closed.</p>
+
+<h3 id="fe-invite">6.16 Invitations</h3>
+
+<h4>app/(app)/invitations/accept/page.tsx</h4>
+<p>Reads the <code>token</code> from the URL, immediately POSTs to <code>/api/projects/accept-invite</code>, and redirects to the project on success. On failure it shows the error.</p>
+
+<p>This page is under the <code>(app)</code> route group, so the user must be logged in to accept. If they're not, they hit the route guard and bounce to login, which redirects back on success (a future improvement — currently they have to re-click the invite link, which is fine for the demo).</p>
+
+<!-- ===================== 7. JWT ===================== -->
+<h2 id="jwt"><span class="num">07</span>JWT, in detail</h2>
+<p class="lede">If there's one section to read carefully, it's this one. JWT design is where most authentication footguns live. SYNC's setup is deliberately conservative.</p>
+
+<h3>Why two tokens</h3>
+<p>The pattern is access + refresh. The access token is short-lived (15 minutes) and stateless — every signed access JWT is valid until expiry, with no database check. The refresh token is long-lived (30 days), stored server-side as a hash, and required to obtain new access tokens.</p>
+
+<p>This gives us two properties at once. Access checks are cheap (one JWT verify, no DB round-trip), which is important for high-throughput endpoints and for sockets where every event would otherwise hit the database. Revocation is possible (the refresh row can be marked revoked, denying further rotation), which is what makes "log out from all devices" a real feature rather than a wish.</p>
+
+<h3>Why short access TTL</h3>
+<p>The blast radius of a leaked access token is bounded by the TTL. 15 minutes is a sweet spot — long enough that a user isn't constantly noticing refresh round trips, short enough that a casually stolen token expires before it's useful. Some teams go to 5 minutes. I'd go shorter if the app were higher-stakes; for project management 15 is appropriate.</p>
+
+<h3>Why store refresh tokens server-side</h3>
+<p>Two reasons. First, revocation: a pure-stateless refresh would be valid for its full lifetime regardless of logout. Second, theft detection.</p>
+
+<p>The theft detection mechanism is the most interesting bit. When a refresh succeeds, the old refresh row is marked <code>revokedAt</code> and the new row is created with <code>replacedByJti</code> pointing at the new jti. If a refresh comes in with a token whose row is already revoked, that's either (a) a stale token sent by accident, or (b) a stolen token being used by an attacker after the legitimate user already rotated.</p>
+
+<p>We can't tell which it is from a single request, but we can take the safe action: <strong>revoke every refresh token for that user</strong>. The legitimate user gets logged out and has to log in again (annoying but bounded); the attacker can't continue rotating. This is RFC 6819's recommended pattern (and the basis for OAuth 2.0 refresh token rotation in section 5.2.1 of RFC 8252).</p>
+
+<h3>Why bcrypt-hashed refresh tokens</h3>
+<p>A database leak that included plaintext refresh tokens would let an attacker forge sessions until each token expires. With bcrypt hashes, even a full database leak doesn't yield usable tokens — the attacker would have to brute-force each hash, which is by design slow.</p>
+
+<p>The cost is one bcrypt operation per refresh request. At cost 10 (lower than password hashing) this is about 50ms. Acceptable for a request that happens every 15 minutes.</p>
+
+<h3>Why HttpOnly cookies for refresh, in-memory for access</h3>
+<p>The refresh token is high-value (long-lived, can spawn access tokens). Putting it in localStorage exposes it to any XSS. Putting it in an HttpOnly cookie hides it from JavaScript entirely.</p>
+
+<p>The access token is lower-value (short-lived, single-purpose) and needs to be readable by the JS that makes API calls. The compromise is to keep it in memory only — never in localStorage, never in cookies. On page reload it's gone, and we recover by trading the refresh cookie for a new access token during auth provider hydration. This is the "in-memory access + HttpOnly refresh cookie" pattern, which is the OWASP recommendation for SPAs.</p>
+
+<h3>The cookie attributes</h3>
+<p>The refresh cookie carries these attributes:</p>
+<ul>
+  <li><code>HttpOnly</code> — invisible to JS.</li>
+  <li><code>Secure</code> in production — only sent over HTTPS.</li>
+  <li><code>SameSite=None</code> in production (when frontend and backend are different origins, which they are on Vercel + Render) — required for cross-origin cookie transport. Browsers require <code>Secure</code> for <code>SameSite=None</code>, hence the previous bullet.</li>
+  <li><code>SameSite=Lax</code> in dev — cookies travel on top-level navigations and most cross-origin requests, which is convenient for local testing.</li>
+  <li><code>Path=/api/auth</code> — the cookie is only sent on auth routes. This limits exposure: even if a non-auth route is somehow vulnerable to CSRF, the refresh cookie isn't in scope.</li>
+  <li><code>expires</code> matching the refresh TTL.</li>
+</ul>
+
+<h3>Four secrets, four token kinds</h3>
+<p>Access, refresh, reset, invite each have their own signing secret. If the access secret were ever leaked, the attacker could forge access tokens but not reset or invite tokens. This is paranoia in the good sense — separating concerns reduces the impact of any single failure.</p>
+
+<p>The secrets are generated fresh on each Render deploy via <code>generateValue: true</code> in <code>render.yaml</code>. Locally they're filled with high-entropy random values in <code>.env</code>.</p>
+
+<h3>Reset tokens revoke sessions</h3>
+<p>Resetting a password invalidates every refresh token belonging to the user. The reasoning: if the user is resetting their password, they likely suspect compromise, and the right action is to terminate every existing session. The next login will produce a new pair.</p>
+
+<h3>Invitation tokens are bound to email</h3>
+<p>Invitation JWTs carry the invitee's email in the payload. On accept, the server verifies that the accepting user's email matches the invited email. This prevents an attacker who steals an invitation link from joining as their own account — the link is bound to the original recipient.</p>
+
+<!-- ===================== 8. CACHING ===================== -->
+<h2 id="caching"><span class="num">08</span>Caching, in detail</h2>
+
+<h3>What's cached</h3>
+<p>Two endpoints. The "list my projects" query (per user, per filter set) and the "list tasks in this project" query (per project, per filter set). Both are paginated, both can be hot during dashboard browsing, both can be invalidated cleanly when the underlying data changes.</p>
+
+<h3>What's not cached</h3>
+<p>Individual project detail, individual task detail, user profile, activity feed, notifications. Reason: those are either small point lookups (cheap to recompute) or write-heavy (caching adds invalidation complexity for marginal benefit).</p>
+
+<h3>The cache key shape</h3>
+<p>For projects: <code>projects:&lt;userId&gt;:&lt;status&gt;:&lt;search&gt;:&lt;page&gt;:&lt;limit&gt;</code>. For tasks: <code>tasks:&lt;projectId&gt;:&lt;status&gt;:&lt;priority&gt;:&lt;assignee&gt;:&lt;search&gt;:&lt;sort&gt;:&lt;page&gt;:&lt;limit&gt;</code>. The components are concatenated in a fixed order; missing values are empty strings.</p>
+
+<p>Two queries with the same filters resolve to the same key. Two queries that differ in any way produce different keys. The downside is keyspace explosion — every distinct filter combination is its own cache entry, which can chew through memory if users hit many distinct filter sets. Mitigated by the short TTL.</p>
+
+<h3>Invalidation by prefix</h3>
+<p>Every project mutation calls <code>memoryCache.invalidatePrefix('projects:' + userId)</code>, which iterates the keyspace and deletes every key starting with that prefix. Every task mutation calls the analogous task-prefix invalidation.</p>
+
+<p>This is the simplest correct invalidation. Smarter strategies (compute which cache keys are actually affected and only invalidate those) save memory but add complexity. Prefix invalidation is O(n) over keys, which is fine at the scale this app runs at.</p>
+
+<h3>TTLs</h3>
+<p>Project list: 30 seconds. Task list: 15 seconds. These are short enough that staleness is rarely user-visible and long enough to absorb bursts of identical requests during a busy session.</p>
+
+<h3>Why in-memory, not Redis</h3>
+<p>Two reasons. First, the deployment target is a single Render dyno. Multiple dynos would need a shared cache; one dyno doesn't. Second, the Cache interface is abstract enough that swapping to Redis is a one-file change — I haven't done it yet because there's no scaling pressure, but the path is short.</p>
+
+<p>I installed <code>ioredis</code> as a dependency anyway, signaling intent and avoiding the situation where someone discovers the missing dependency mid-migration.</p>
+
+<h3>Cache coherence with sockets</h3>
+<p>A subtle point: when a task is updated via REST, the controller broadcasts <code>task:updated</code> to the project room. Clients connected to that room update their local store immediately. Other clients (not in the room, browsing the project list) might hit a cached "task list" query and see stale data for up to 15 seconds.</p>
+
+<p>That's acceptable. The cache is a freshness optimization, not a correctness mechanism. The socket layer carries the freshness signal to anyone actively viewing the project.</p>
+
+<!-- ===================== 9. REAL-TIME ===================== -->
+<h2 id="realtime"><span class="num">09</span>Real-time, in detail</h2>
+
+<h3>The room model</h3>
+<p>Two kinds of rooms. The personal room <code>user:&lt;id&gt;</code> is joined on connect and carries notifications addressed to that user — useful when the user is connected from multiple tabs or devices. The project room <code>project:&lt;id&gt;</code> is joined explicitly via the <code>project:join</code> event after the server re-checks membership.</p>
+
+<p>Broadcasts go to project rooms (for project-scoped events) or personal rooms (for direct-to-user notifications). The two are independent: a user can be in zero projects yet still receive personal notifications.</p>
+
+<h3>Authorization on join</h3>
+<p>The handshake authenticates the user (JWT). Joining a room authorizes them for it. The server re-runs the membership check on every <code>project:join</code> — we don't trust the client to send a project id they're allowed in.</p>
+
+<p>This is the defense against the "user used to be a member, was removed, but their socket still in the room" scenario. The room subscription is established at join time, and the membership check at that moment is what gates access. There's a residual window: if a user is removed mid-session, they'll continue to receive events until they disconnect. A future improvement is to track membership changes and force-leave affected sockets.</p>
+
+<h3>Server is the single source of truth for writes</h3>
+<p>I made this a non-negotiable rule. Clients never write to the database via sockets. Every state change goes through an HTTP endpoint with full validation, RBAC, and audit logging. After the change lands, the controller broadcasts the new state to the project room.</p>
+
+<p>The opposite pattern — clients emit "task:update" with a payload, the server applies it directly to the database — is faster (no HTTP round trip) but creates an entirely separate validation pipeline. I would have to duplicate every Zod check inside the socket handler, plus the RBAC check, plus the cache invalidation. The complexity isn't worth the latency saving.</p>
+
+<h3>Presence indicators</h3>
+<p>The "X is editing this task" badge is implemented with two events: <code>task:editing</code> when the client opens a task dialog, <code>task:stop_editing</code> when it closes. The server broadcasts each to the project room.</p>
+
+<p>The cleanup-on-disconnect is the important bit. If a user closes their browser mid-edit, the server inspects the socket's stored editing state and emits <code>task:stop_editing</code> on their behalf. Without this, other clients would see a ghost presence badge until the next page reload.</p>
+
+<h3>Optimistic concurrency, end to end</h3>
+<p>Tasks carry a <code>version</code> integer. Every update increments it server-side via <code>$inc</code>. Client updates pass an <code>expectedVersion</code>; if it doesn't match the stored version, the conditional update matches zero documents and we return 409 with the code <code>VERSION_CONFLICT</code>.</p>
+
+<p>The client handles 409 by refetching the task and surfacing a toast ("This task was modified — please reload"). The user sees the latest state and can re-apply their change.</p>
+
+<p>For socket-driven updates, the client's store has the same version check in its upsert: if the incoming task has a lower version than what we have, we drop the update. This handles racy event delivery where an old update arrives after a newer one.</p>
+
+<h3>What this doesn't do</h3>
+<p>Operational transformation (Google Docs-style real-time collaborative editing of the description field) is not implemented. The current model is last-write-wins on the whole task. Adding OT or a CRDT for the description field is a meaningful piece of work — <code>yjs</code> with a <code>y-socket.io</code> adapter would be my pick — and is filed under "what I'd do next."</p>
+
+<h3>Reconnection</h3>
+<p>Socket.io's client reconnects automatically with exponential backoff. I configured infinite retry attempts so a long disconnect (e.g., laptop suspend) recovers gracefully when the network comes back. On reconnect we re-join every project room we were in before, so the user picks up where they left off.</p>
+
+<!-- ===================== 10. SECURITY ===================== -->
+<h2 id="security"><span class="num">10</span>Security model</h2>
+
+<p>Let me walk every layer.</p>
+
+<h3>Transport</h3>
+<p>HTTPS everywhere in production. Render provides a managed certificate; Vercel does the same. The refresh cookie is <code>Secure</code> in production, so it only travels over HTTPS. Helmet adds <code>Strict-Transport-Security</code>.</p>
+
+<h3>CORS</h3>
+<p>Strict allowlist via an explicit origin callback. The frontend Vercel origin is in the list; nothing else is. Credentials are allowed because the refresh cookie needs to cross.</p>
+
+<h3>Helmet headers</h3>
+<p>Default helmet config minus CSP (which needs more careful tuning than fits in this build). That gives me X-Frame-Options, X-Content-Type-Options, Referrer-Policy, X-DNS-Prefetch-Control, HSTS in production, and a handful of less-glamorous protections.</p>
+
+<h3>Rate limiting</h3>
+<p>Per-IP limits on auth (10 / 15 min) and a permissive global limit (300 / 15 min). The auth limit is the brute-force defense. For demo, this is sufficient. In production with real traffic I'd add per-account login limits and a CAPTCHA escalation.</p>
+
+<h3>Password handling</h3>
+<p>bcrypt cost 12, hash stored with <code>select: false</code> so it can't accidentally be returned in a populated query. Passwords are validated for minimum complexity (8+ chars, upper, lower, number) — the brief doesn't dictate the exact rules, and these match common best practice.</p>
+
+<h3>JWT secrets</h3>
+<p>Four separate high-entropy secrets, generated fresh per Render deploy. Never logged. Never serialized to the client. The error handler's stack trace inclusion is dev-only, so a stack trace can't leak a secret in production.</p>
+
+<h3>Input validation</h3>
+<p>Every request body, query, and param is validated by Zod before reaching a controller. ObjectIds are checked against the 24-hex regex. String lengths are bounded. Enums are enforced. The Mongoose schemas are a second layer of defense in case anything slips through.</p>
+
+<h3>XSS</h3>
+<p>The frontend uses React, which auto-escapes all <code>{value}</code> bindings. No <code>dangerouslySetInnerHTML</code> anywhere. The only HTML I generate is in email templates, where the user-supplied fields (name, project name, role) are HTML-escaped by a small helper before interpolation.</p>
+
+<h3>CSRF</h3>
+<p>The refresh cookie is path-scoped to <code>/api/auth</code> and uses <code>SameSite=None</code> only because cross-origin is required. With <code>SameSite=Lax</code> in dev, top-level navigations carry the cookie but most cross-origin requests don't — a partial CSRF defense. For production with <code>SameSite=None</code>, the path scoping limits exposure: only <code>/api/auth/refresh</code> reads it, and that endpoint only ever issues new tokens (it doesn't perform user-facing mutations). The actual mutations (POST /tasks, etc.) require the access token in the <code>Authorization</code> header, which JavaScript on a third-party origin can't read or forge.</p>
+
+<p>For a higher-stakes app I'd add a CSRF token on the refresh endpoint specifically, double-submitted via header. Not required at this assignment's scope.</p>
+
+<h3>File upload safety</h3>
+<p>Mime allowlist on upload (images, common document types, archives, plain text). Size cap at 5MB. The uploaded file's URL is generated server-side from a trusted provider; we never echo back a URL the client could control. Downloads go through a signed-URL redirect with <code>Content-Disposition: attachment</code> for non-images so the browser downloads instead of rendering arbitrary content.</p>
+
+<p>What I deliberately don't do: server-side virus scanning, image dimension validation, server-side image processing. Those are out of scope for the assignment and would be ClamAV / sharp / similar in a real production setup.</p>
+
+<h3>Database access</h3>
+<p><code>strictQuery: true</code> means queries can't reference fields the schema doesn't know about — small defense against ReDoS-style injection via query parameters. Mongoose's parameterized queries inherently defend against the JS injection equivalent of SQL injection.</p>
+
+<h3>Mongo's connection</h3>
+<p>Atlas requires authentication; the URI carries credentials. The credentials live only in Render's secret store; <code>render.yaml</code> declares <code>sync: false</code> for <code>MONGO_URI</code> meaning it won't be set automatically.</p>
+
+<!-- ===================== 11. FILE UPLOAD ===================== -->
+<h2 id="upload"><span class="num">11</span>File upload, end-to-end</h2>
+
+<p>Tracing one upload from browser to storage, with every layer.</p>
+
+<h3>Step 1: Client picks a file</h3>
+<p>The task dialog has a hidden file input wrapped in a styled label. Clicking the label opens the OS file picker. On change, the file goes to <code>onFileChange</code>.</p>
+
+<h3>Step 2: Client constructs FormData</h3>
+<p>FormData with two fields: <code>file</code> (the binary) and <code>taskId</code> (string). The data is fed to <code>uploadWithProgress</code>, which uses XHR rather than fetch because fetch doesn't support upload progress.</p>
+
+<h3>Step 3: XHR sends multipart</h3>
+<p>The XHR is opened against <code>/api/projects/:projectId/files</code> with the access token in the Authorization header and <code>withCredentials: true</code>. The <code>upload.onprogress</code> handler updates a state variable that drives the progress bar.</p>
+
+<h3>Step 4: Multer parses multipart on the server</h3>
+<p>The upload route mounts multer's single-file middleware. Multer reads the multipart stream into a Node Buffer in memory (capped at 5MB by config). The buffer attaches to <code>req.file</code> with metadata: <code>originalname</code>, <code>mimetype</code>, <code>size</code>.</p>
+
+<h3>Step 5: Controller delegates to file service</h3>
+<p>The file controller pulls <code>req.file</code> and <code>req.body.taskId</code>, hands off to <code>uploadFile</code>.</p>
+
+<h3>Step 6: Service validates</h3>
+<p><code>assertAllowed</code> checks the mime type is in the allowlist and the size is within the cap. If the upload claims a <code>taskId</code>, we verify the task exists in the project (defense against a malicious client uploading to a task that's not actually in the project they have access to).</p>
+
+<h3>Step 7: Storage adapter uploads</h3>
+<p><code>getStorage()</code> returns either the Cloudinary or S3 adapter based on env. Both adapters present the same interface.</p>
+
+<p>The Cloudinary path streams the buffer through <code>upload_stream</code> with the folder, resource type (image vs raw), and unique filename flags set. Cloudinary returns a <code>secure_url</code> and a <code>public_id</code>.</p>
+
+<p>The S3 path constructs a key (<code>folder/uuid-stem.ext</code>), runs <code>PutObjectCommand</code>, and returns a public URL based on the configured endpoint plus the key.</p>
+
+<h3>Step 8: Persist the File document</h3>
+<p>A new File row is inserted with project, optional task, filename, mime, size, URL, public id, resource type, uploader.</p>
+
+<h3>Step 9: Attach to task atomically</h3>
+<p>If there's a <code>taskId</code>, we use <code>findByIdAndUpdate</code> with a <code>$push</code> on the attachments array and an <code>$inc</code> on the version. Atomic; no read-modify-write race.</p>
+
+<h3>Step 10: Activity log + socket broadcast</h3>
+<p>The service calls <code>logActivity</code> with action <code>task.attachment_added</code>. The controller calls <code>emitToProject</code> with <code>task:attachment_added</code> and the file payload. Connected clients update their UI.</p>
+
+<h3>Step 11: HTTP 201 to the original caller</h3>
+<p>The caller (the task dialog) refetches the task to pull in the updated attachments array and re-render.</p>
+
+<h3>Downloads</h3>
+<p>The download endpoint is <code>GET /api/projects/:projectId/files/:fileId/download</code>. The handler loads the file metadata, asks the storage adapter for a signed URL, and 302-redirects to it. The redirect URL is good for 5 minutes; after that the link expires.</p>
+
+<p>For non-images, the signed URL carries <code>Content-Disposition: attachment; filename=...</code> so browsers download instead of rendering arbitrary content. For images we let the browser display them inline (useful for thumbnails).</p>
+
+<!-- ===================== 12. DOCKER ===================== -->
+<h2 id="docker"><span class="num">12</span>The Docker stack</h2>
+
+<p>The repo ships a <code>docker-compose.yml</code> that runs MongoDB, MinIO, and Mailpit locally so you don't need Atlas, Cloudinary, or Resend to develop or demo.</p>
+
+<h3>Services</h3>
+<table>
+  <tr><th>Container</th><th>Image</th><th>Purpose</th><th>Replaces</th></tr>
+  <tr><td>sync-mongo</td><td>mongo:7</td><td>Database</td><td>MongoDB Atlas</td></tr>
+  <tr><td>sync-mongo-express</td><td>mongo-express:1.0</td><td>Browser-based admin UI on :8081</td><td>Atlas UI</td></tr>
+  <tr><td>sync-minio</td><td>minio/minio:latest</td><td>S3-compatible storage on :9000, console on :9001</td><td>Cloudinary</td></tr>
+  <tr><td>sync-minio-init</td><td>minio/mc:latest</td><td>One-shot — creates the bucket and makes it public-readable</td><td>—</td></tr>
+  <tr><td>sync-mailpit</td><td>axllent/mailpit:1.20</td><td>SMTP catcher with web inbox on :8025</td><td>Resend</td></tr>
+</table>
+
+<h3>Why each</h3>
+
+<h4>MongoDB 7</h4>
+<p>The current stable. Replica-set-ready (necessary if you want to use transactions). A volume persists data between restarts. A healthcheck pings the admin command — used by Mongo Express to wait for Mongo to be ready before starting.</p>
+
+<h4>Mongo Express</h4>
+<p>Optional but useful for inspecting data during demos. No auth required because it's bound to localhost only. Not for production.</p>
+
+<h4>MinIO</h4>
+<p>S3-compatible object storage with a fast Go implementation. The image runs in single-node mode (sufficient for dev), with both the S3 API (9000) and the web console (9001) exposed. Volume-backed for persistence.</p>
+
+<p>The default credentials are <code>minioadmin/minioadmin</code> — fine for local dev, never use in production.</p>
+
+<h4>MinIO init container</h4>
+<p>A one-shot container running the MinIO client (<code>mc</code>) that waits for MinIO to be healthy, creates the <code>sync</code> bucket (idempotent — <code>--ignore-existing</code>), and sets a download-readable policy on it. Without this step, file URLs from MinIO would 403 because the bucket defaults to private.</p>
+
+<p>For production with real S3, you'd use signed download URLs exclusively (which the storage adapter supports). The MinIO public-read policy is a dev convenience.</p>
+
+<h4>Mailpit</h4>
+<p>Catches every SMTP message on port 1025 and shows it in a web UI on 8025. The SMTP auth is permissive (<code>MP_SMTP_AUTH_ACCEPT_ANY: 1</code>) so any credentials work. This means password reset and invitation emails appear in your local browser instead of trying to deliver.</p>
+
+<p>Alternative is MailHog, which is essentially the same idea by a different team. Mailpit is more actively maintained.</p>
+
+<h3>What this gives you</h3>
+<p>A complete local stack. <code>docker compose up -d</code>, then <code>pnpm dev</code> in each project, and SYNC works end-to-end without any external accounts. File uploads land in MinIO and are visible in the console. Password resets land in Mailpit and are clickable.</p>
+
+<!-- ===================== 13. DEPLOY ===================== -->
+<h2 id="deploy"><span class="num">13</span>Deployment</h2>
+
+<p>Two production topologies are supported. <strong>(A) Vercel single-deploy</strong> is the recommended one — both services on one Vercel app, same origin, simpler cookie story. <strong>(B) Vercel + Render</strong> is the classic split. Both are first-class; pick the one whose constraints fit you.</p>
+
+<p>For complete copy-pasteable env templates per topology, see <a href="ENV.md">docs/ENV.md</a>.</p>
+
+<h3>§A. Vercel single-deploy</h3>
+<p>The repo ships a <code>vercel.json</code> at the root with Vercel's <code>experimentalServices</code> block declaring two services:</p>
+
+<pre><code>{
+  "experimentalServices": {
+    "frontend": { "root": "frontend", "routePrefix": "/",          "framework": "nextjs"  },
+    "backend":  { "root": "backend",  "routePrefix": "/_/backend", "framework": "express" }
+  }
+}</code></pre>
+
+<p>Vercel routes <code>/</code>, <code>/login</code>, <code>/projects/*</code>, and so on to the Next.js frontend. Anything under <code>/_/backend/*</code> — including <code>/_/backend/socket.io/</code> — goes to the Express service. From the browser's perspective, the entire app lives on <em>one origin</em>, which simplifies several things in nice ways.</p>
+
+<h4>What changes about cookies</h4>
+<p>On the cross-origin setup, the refresh cookie had to be <code>SameSite=None; Secure</code> with credentials enabled on CORS. On the single-deploy, the cookie can be <code>SameSite=Lax</code> — friendlier defaults, fewer browser warnings, and not vulnerable to the kinds of cross-origin attacks that <code>None</code> opens up.</p>
+
+<p>The subtler thing is the cookie <em>path</em>. Originally I set <code>Path=/api/auth</code> because that was the URL the browser saw. On the Vercel single-deploy, the browser sees auth URLs as <code>/_/backend/api/auth/refresh</code>, so the cookie must be scoped there or it won't be sent back. I made the path configurable via <code>COOKIE_PATH</code> — set it to <code>/_/backend/api/auth</code> on Vercel, leave it at <code>/api/auth</code> on Render. If you forget this, login appears to work but every subsequent refresh fails silently with no cookie attached. Most common gotcha on this topology.</p>
+
+<h4>What changes about the Socket.io path</h4>
+<p>Socket.io's handshake URL is <code>&lt;origin&gt;/socket.io/</code> by default. On the single-deploy with the backend at <code>/_/backend</code>, the path becomes <code>/_/backend/socket.io/</code>. The frontend's socket client auto-derives this from <code>NEXT_PUBLIC_API_URL</code>: if the URL is absolute (<code>https://api.example.com</code>), it uses the default <code>/socket.io/</code> path; if the URL is relative (<code>/_/backend</code>), it prepends the prefix. No manual config needed.</p>
+
+<h4>What changes about CORS</h4>
+<p>Same-origin requests bypass the browser's CORS check entirely — the browser sends them without preflight and without enforcing <code>Access-Control-Allow-Origin</code>. The backend's CORS middleware is still configured (defense in depth, in case something later changes the origin model), but in practice it's a no-op for the same-origin path.</p>
+
+<h4>What this requires from Vercel</h4>
+<p>Socket.io needs a long-lived connection. Vercel's <code>experimentalServices</code> with <code>framework: "express"</code> runs the backend as a persistent Node process (not a serverless function), which is what makes WebSocket support work. If at some point you migrate the backend to classic serverless functions, you'd need to move the realtime layer to a managed service (Pusher, Ably, PartyKit). For the assignment surface, the persistent Express service is the right fit.</p>
+
+<h4>The actual deploy steps</h4>
+<p>One: push the repo to GitHub. Two: import on Vercel — it reads <code>vercel.json</code> and picks up both services. Three: under Project Settings → Environment Variables, paste the env block from <code>docs/ENV.md §3.1</code>, splitting between the <code>frontend</code> and <code>backend</code> services as marked. Four: redeploy.</p>
+
+<h3>§B. Vercel (frontend) + Render (backend)</h3>
+<p>If you don't have <code>experimentalServices</code> access yet, or you want the backend isolated from the frontend, the original split works exactly the same as before. The <code>render.yaml</code> blueprint provisions an Express web service. Build is <code>npm install &amp;&amp; npm run build</code>, start is <code>npm start</code>, health check at <code>/health</code>.</p>
+
+<p>Env vars fall into three categories. The non-secret defaults (like <code>NODE_ENV=production</code>, TTLs) are set in the blueprint. The JWT secrets are declared with <code>generateValue: true</code> so Render generates strong randoms on first deploy. The actual secrets (Mongo URI, Cloudinary keys, Resend key, CORS origins) are declared with <code>sync: false</code> meaning Render asks for them at deploy time.</p>
+
+<p>Cookies on this topology are <code>SameSite=None; Secure</code> (cross-origin between Vercel and Render). <code>COOKIE_PATH</code> stays at the default <code>/api/auth</code>. <code>COOKIE_SAMESITE=none</code> must be set explicitly.</p>
+
+<p>Frontend setup on Vercel is the same regardless of topology — point the project root at <code>frontend/</code> and set <code>NEXT_PUBLIC_API_URL</code> to either <code>/_/backend</code> (single-deploy) or the Render URL.</p>
+
+<h3>Atlas setup (both topologies)</h3>
+<p>Create a free M0 cluster, create a database user with <code>readWrite</code> on the database, allowlist <code>0.0.0.0/0</code> for trial (in production you'd narrow this to known egress IPs), copy the connection string into the backend env as <code>MONGO_URI</code>.</p>
+
+<h3>Cookie wiring summary</h3>
+<table>
+  <tr><th>Topology</th><th><code>COOKIE_PATH</code></th><th><code>COOKIE_SAMESITE</code></th><th><code>COOKIE_SECURE</code></th></tr>
+  <tr><td>Local dev</td><td>/api/auth</td><td>lax (auto)</td><td>false</td></tr>
+  <tr><td>Vercel single-deploy</td><td>/_/backend/api/auth</td><td>lax</td><td>true</td></tr>
+  <tr><td>Vercel + Render</td><td>/api/auth</td><td>none</td><td>true</td></tr>
+</table>
+
+<h3>Smoke test</h3>
+<p>After deploy: hit <code>/health</code> on the backend (<code>https://your-app.vercel.app/_/backend/health</code> for single-deploy, <code>https://your-api.onrender.com/health</code> for split), open the frontend, register an account, create a project, open the project in two tabs, drag a task between columns in one, watch it move in the other. If the second tab updates inside a second, real-time is working. If the page can be reloaded and you stay logged in, refresh is working. If a password-reset email arrives in Resend, email is working.</p>
+
+<p>If you log in successfully but every subsequent request 401s — that's <code>COOKIE_PATH</code>. Check it matches the browser-visible auth URL.</p>
+
+<!-- ===================== 14. TRADE-OFFS ===================== -->
+<h2 id="tradeoffs"><span class="num">14</span>Trade-offs</h2>
+<p>The 48-hour brief forces choices. Here's where I cut.</p>
+
+<h3>No Redis cache</h3>
+<p>In-memory cache only. Means horizontal scaling immediately costs cache coherence. Decision: defer until there's a reason to scale horizontally. The Cache interface makes the swap trivial.</p>
+
+<h3>No background job queue</h3>
+<p>Emails send synchronously through Resend's HTTP API (which is fast — usually under 200ms). Cloudinary cleanups on file delete are best-effort. A bull/bullmq queue would let me retry failures and offload bursts, but the queue infrastructure itself costs setup time I didn't have.</p>
+
+<h3>No Redis-backed Socket.io adapter</h3>
+<p>One backend instance only. Multi-instance would need <code>@socket.io/redis-adapter</code> for cross-instance message delivery.</p>
+
+<h3>No comments, @mentions, task tags, CSV export, analytics, dependencies</h3>
+<p>All explicitly optional in the brief. Cut to focus on the core.</p>
+
+<h3>No rich-text task descriptions</h3>
+<p>Plain text only. Rich text would imply either a sanitizer pass or a structured format like ProseMirror's JSON. Out of scope.</p>
+
+<h3>No fine-grained task permissions</h3>
+<p>"Member" can edit any task in the project. The brief says "create/edit assigned tasks" but is ambiguous — I read it as "members can create and edit, viewers can only read." A stricter interpretation would require per-task ownership checks. Trivial to add later.</p>
+
+<h3>No notification fan-out via socket</h3>
+<p>Notifications are persisted to the DB and surfaced when the bell icon opens. They're not pushed live to the user's personal socket room. A two-line addition; cut because the demo flow makes the activity feed and toasts sufficient.</p>
+
+<h3>No automatic membership-change room eviction</h3>
+<p>If a user is removed from a project mid-session, their socket stays in the room until they disconnect. Could be solved by tracking each user's sockets and forcing them out on membership changes. Future work.</p>
+
+<h3>Limited test coverage</h3>
+<p>Auth, task CRUD with version conflict, file upload happy-path and rejection. Critical paths only, as the brief allows. No E2E tests; no socket-handler tests.</p>
+
+<h3>Plain HTML drag-and-drop</h3>
+<p>No <code>dnd-kit</code>, no <code>react-beautiful-dnd</code>. The native HTML5 drag API is enough for "drag card between columns." More complex interactions (cross-list reorder with animation) would justify a library.</p>
+
+<h3>No dark mode toggle in UI</h3>
+<p>The CSS tokens support dark mode but there's no toggle in the chrome. Trivial to add — a <code>useState</code> + a class on <code>html</code> + a button.</p>
+
+<h3>No telemetry / observability</h3>
+<p>No Sentry, no OpenTelemetry, no metrics. Pino logs are it.</p>
+
+<h3>No image processing</h3>
+<p>Uploaded images aren't resized or thumbnailed. The frontend renders them at whatever size they were uploaded at, relying on browsers' lazy loading. For production with arbitrary user uploads I'd use sharp or rely on Cloudinary's transformation pipeline.</p>
+
+<!-- ===================== 15. FUTURE ===================== -->
+<h2 id="future"><span class="num">15</span>What I'd do next</h2>
+
+<p>If I had another week, in priority order:</p>
+
+<h3>1. Redis everywhere needed</h3>
+<p>Move the cache to Redis (so we can scale to N backend instances), wire the <code>@socket.io/redis-adapter</code> (so room broadcasts work across instances), and use Redis for rate limiting (so the same per-IP limit applies across instances). One day of careful work.</p>
+
+<h3>2. Background queues</h3>
+<p>BullMQ with a Redis backend. Email sending moves to a queue (Resend already retries internally but a queue gives us our own retry policy and visibility). Cloudinary cleanups on file delete move to a queue. Anything that's currently synchronous-and-best-effort gets durable retry. Half a day.</p>
+
+<h3>3. Real-time OT for descriptions</h3>
+<p>yjs with the y-socket.io adapter. Descriptions become collaboratively editable. The version field on tasks stays for non-description fields; descriptions get OT. One to two days depending on the editor (TipTap on top of ProseMirror would be my pick).</p>
+
+<h3>4. Sentry + OpenTelemetry</h3>
+<p>Error tracking on both frontend and backend. Distributed traces across the HTTP request, socket event, and Mongo query. One day for the basic wiring.</p>
+
+<h3>5. Comments with mentions</h3>
+<p>The brief's biggest cut. A Comment model on tasks, @-mention parsing, notifications fan out. Half a day to a day depending on richness.</p>
+
+<h3>6. Tags and CSV export</h3>
+<p>Tag schema, multi-select on the kanban filter, CSV export endpoint that streams a project's tasks. Half a day.</p>
+
+<h3>7. Tighter permissions</h3>
+<p>Per-task ownership ("member can only edit tasks they created or are assigned to"). A small filter change in the task update controller and the kanban drag handler. An afternoon.</p>
+
+<h3>8. Membership-change socket eviction</h3>
+<p>Track each user's sockets in a Map. On membership removal, iterate the user's sockets and force them out of the project room. Half a day.</p>
+
+<h3>9. E2E tests with Playwright</h3>
+<p>Run two browser contexts, register two users, invite, drag a task in one, assert update in the other. Two days for a meaningful suite covering the realtime flows.</p>
+
+<h3>10. CSP and SRI</h3>
+<p>Content Security Policy on the backend, Subresource Integrity on any third-party scripts (we have none currently, but the moment we add analytics or a font CDN, SRI applies). Half a day with policy reports.</p>
+
+<h3>11. Image processing</h3>
+<p>sharp-based resize on upload, store original + thumbnail variants. Half a day.</p>
+
+<h3>12. Audit log surface</h3>
+<p>The activity feed is project-scoped. An admin-level audit log surface would show every authentication event, role change, and file access. Half a day.</p>
+
+<!-- ===================== 16. COLOPHON ===================== -->
+<h2 id="colophon"><span class="num">16</span>Colophon</h2>
+
+<p>This document was written by hand to capture every meaningful choice. It's intentionally long. If you read it end-to-end you should be able to defend any decision in the codebase against a reviewer who hasn't seen the project before.</p>
+
+<p>If something here looks wrong, it might be — I'd rather be specific and correctable than vague. The README is the version of this document I'd hand to a hiring manager; this one is the version I'd hand to a senior engineer joining the team.</p>
+
+<p>Thanks for reading.</p>
+
+<p style="margin-top: 64px; color: var(--ink-faint); font-size: 13px;">— SYNC engineering, build log</p>
+
+</article>
+</div>
+</body>
+</html>
