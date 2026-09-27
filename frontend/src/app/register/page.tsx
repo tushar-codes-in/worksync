@@ -58,7 +58,7 @@ export default function RegisterPage() {
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle>Create your account</CardTitle>
-          <CardDescription>Start collaborating on SYNC in 60 seconds</CardDescription>
+          <CardDescription>Start collaborating on WorkSync in 60 seconds</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>

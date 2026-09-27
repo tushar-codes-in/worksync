@@ -4,7 +4,7 @@ import { AuthProvider } from '@/components/providers/auth-provider';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'SYNC — Real-time project management',
+  title: 'WorkSync — Real-time project management',
   description:
     'Collaborative project & task management with real-time updates.',
 
@@ -15,17 +15,17 @@ export const metadata: Metadata = {
   },
 
   openGraph: {
-    title: 'SYNC — Real-time project management',
+    title: 'WorkSync — Real-time project management',
     description:
       'Collaborative project & task management with real-time updates.',
     url: 'https://sync-main.vercel.app',
-    siteName: 'SYNC',
+    siteName: 'WorkSync',
     images: [
       {
         url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'SYNC Project Management',
+        alt: 'WorkSync Project Management',
       },
     ],
     locale: 'en_US',
@@ -34,7 +34,7 @@ export const metadata: Metadata = {
 
   twitter: {
     card: 'summary_large_image',
-    title: 'SYNC — Real-time project management',
+    title: 'WorkSync — Real-time project management',
     description:
       'Collaborative project & task management with real-time updates.',
     images: ['/og-image.png'],

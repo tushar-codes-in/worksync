@@ -49,7 +49,7 @@ export default function HomePage() {
           className="mb-1 font-serif text-[72px] font-normal leading-none tracking-tight"
           style={{ animation: 'fadeUp 0.7s ease forwards 0.25s', opacity: 0 }}
         >
-          Sync<span className="opacity-35 italic">.</span>
+          WorkSync<span className="opacity-35 italic">.</span>
         </h1>
 
         <p

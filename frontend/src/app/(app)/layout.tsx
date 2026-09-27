@@ -43,7 +43,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     <div className="flex min-h-screen flex-col">
       <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur">
         <div className="container flex h-14 items-center justify-between">
-          <Link href="/dashboard" className="text-lg font-semibold">SYNC</Link>
+          <Link href="/dashboard" className="text-lg font-semibold">WorkSync</Link>
           <div className="flex items-center gap-3">
             <NotificationsBell />
             <DropdownMenu>
