@@ -1,4 +1,4 @@
-# SYNC — Real-time Collaborative Project Management
+# WorkSync — Real-Time Team Collaboration & Project Management
 
 A production-ready MERN stack platform for real-time team task management.
 
